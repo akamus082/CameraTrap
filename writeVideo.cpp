@@ -3,11 +3,13 @@
 #include <iostream>
 #include <streambuf>
 
+// Compile with:
+// g++ -I/usr/local/include/opencv -I/usr/local/include/opencv2 -L/usr/local/lib/ -g -o writeVideo writeVideo.cpp -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_ml -lopencv_video -lopencv_features2d -lopencv_calib3d -lopencv_objdetect -lopencv_legacy -lopencv_stitching
+
 using namespace cv;
 using namespace std;
 
 string intToString(int number){
-
 
 	std::stringstream ss;
 	ss << number;
@@ -17,7 +19,11 @@ string intToString(int number){
 int main(int argc, char* argv[])
 {
 
-	VideoCapture cap(0); // open the video camera no. 0
+	int camera_num = atoi(argv[1]);
+	string filename = argv[2];
+
+
+	VideoCapture cap(camera_num); // open the video camera no. 0
 
 	cv::VideoWriter writer;
 
@@ -29,12 +35,13 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
-	char* windowName = "Webcam Feed";
+	string windowName = "Webcam Feed";
 	namedWindow(windowName,CV_WINDOW_AUTOSIZE); //create a window to display our webcam feed
 
 	//filename string
 
-	string filename = "/home/e4e/CameraTrap/cvPrototyping/writeVideo_cpp_test.avi";
+	// string filename = "/home/e4e/CameraTrap/CameraTrap/writeVideo_cpp_test.avi";
+
 
 	//fourcc integer
 

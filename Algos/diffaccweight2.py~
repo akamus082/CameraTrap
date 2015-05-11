@@ -2,19 +2,6 @@ import cv2
 import numpy as np
 import CameraTrapCV as CTCV
 import cameraswitcher
-import time
-import threading
-
-
-myCamera = cameraswitcher.Camera(0)
-
-
-def timerFunction():
-  if myCamera.is_recording():
-    myCamera.stop_recording()
-  return
-
-tim = threading.Timer(5.0, timerFunction)
 
 def diffImg(t0, t1, t2):
   d1 = cv2.absdiff(t2, t1)
@@ -33,7 +20,6 @@ t_plus = cv2.cvtColor(cam.read()[1], cv2.COLOR_RGB2GRAY)
 f = t.copy()
 gray = t.copy()
 avg = np.float32(f)
-
 
 # Read three images first:
 #fgbg = cv2.BackgroundSubtractorMOG()
@@ -103,14 +89,8 @@ while(1):
       x_pos, y_pos = ctcv.getCentroid(contours[max_index])
       cv2.circle(t, (x_pos, y_pos), 5, (0,0,0), -1)
 
-      if tim.isAlive():
-        print "canceling timer thread"
-        tim.cancel()
+      print "x_pos: " + str(x_pos)
 
-      myCamera.start_recording()
-      if not tim.isAlive():
-        print "starting timer thread"
-        tim.start()
 	
 
       
@@ -118,6 +98,8 @@ while(1):
       #theta = ctcv.getPolar(312,262, x_pos, y_pos)
       #print theta
 
+    else: 
+      print "x_pos: NONE"
 
 
 

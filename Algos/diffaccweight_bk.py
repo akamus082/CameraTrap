@@ -1,6 +1,72 @@
+
+
 import cv2
 import numpy as np
+import math
 import CameraTrapCV as CTCV
+
+
+#############################################################
+
+import cameraswitcher as cs
+
+cam0 = cs.Camera(1)
+cam1 = cs.Camera(2)
+firstPoint = True
+
+
+def angleControl(angle, oldangle):
+  #print "old angle = " + str(oldangle)
+  if angle == 0:
+    turnOffAllCameras()
+  elif cameraAngleChanged(oldangle, angle):
+    switchCameraAngle(angle, oldangle)
+
+
+def cameraAngleChanged(old_angle, new_angle):
+  if old_angle == 0 and new_angle > 0:
+    return True
+  elif old_angle < 180:
+    if new_angle >= 180:
+      return True
+  elif old_angle >= 180:
+    if new_angle < 180:
+      return True
+  else:
+    return False
+
+
+def switchCameraAngle(angle, oldangle):
+  if oldangle == 0:
+    if angle < 180:
+      cam0.start_recording()
+    else:
+      cam1.start_recording()
+  elif cam1.is_recording():
+    cam1.stop_recording()
+    cam0.start_recording()
+  elif cam0.is_recording():
+    cam0.stop_recording()
+    cam1.start_recording()
+
+
+def turnOffAllCameras():
+  if cam1.is_recording():
+    cam1.stop_recording()
+  if cam0.is_recording():
+    cam0.stop_recording()
+
+
+
+##############################################################
+
+
+
+
+def getPolar(x, y, frame_w):
+        r = (x ** 2 + y ** 2) ** 1/2
+        theta = math.atan2(y, (x-frame_w)/2) * 180. / np.pi
+        return [r, theta]
 
 def diffImg(t0, t1, t2):
   d1 = cv2.absdiff(t2, t1)
@@ -59,7 +125,8 @@ while(1):
 
     '''for cnt in contours:
         cv2.drawContours(zeros, [cnt], 0,255,-1)
-'''
+    '''
+    
     #gray = cv2.bitwise_not(t)
     #kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(3,3))
     #res = cv2.morphologyEx(gray,cv2.MORPH_OPEN,kernel)
@@ -84,7 +151,15 @@ while(1):
     
       x_pos, y_pos = ctcv.getCentroid(ctcv.contours[max_index])
       theta = ctcv.getPolar(312,262, x_pos, y_pos)
-      print theta
+      
+	#print theta
+
+      if firstPoint:
+	oldangle = 0
+	firstPoint = False
+      angleControl(theta, oldangle)
+      oldangle = theta
+
 
 
 

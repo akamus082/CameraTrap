@@ -25,11 +25,25 @@ class CameraTrapCV():
         return [x, y]
 
     # converts (x, y) to (r, theta)
+    def getPolar(self,center_x, center_y, x, y):
+        #global theta
+        if(x < 310 | x > 314):
+            x = x - center_x
+            y = y - center_y
+            theta = ((math.atan2(y,x) * 180.0) / np.pi)
+            if(y < 0):
+                return (-theta)
+            else:
+                return (360.0 - theta)
+        else:
+            return 0
+
+    '''
     def getPolar(self, x, y, frame_w):
         r = (x ** 2 + y ** 2) ** 1/2
         theta = math.atan2(y, (x-frame_w)/2) * 180. / self.PI
         return [r, theta]
-
+    '''
 
     # converts an image to a chromaticity image with normalized RGB values
     # ranging between 0 and 255. This color space ignores shadows!

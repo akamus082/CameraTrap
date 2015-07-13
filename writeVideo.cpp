@@ -1,5 +1,5 @@
-#include <opencv\highgui.h>
-#include <opencv\cv.h>
+#include <opencv/highgui.h>
+#include <opencv/cv.h>
 #include <iostream>
 #include <streambuf>
 
@@ -34,7 +34,7 @@ int main(int argc, char* argv[])
 
 	//filename string
 
-	string filename = "E:\myVideo.avi";
+	string filename = "/home/e4e/CameraTrap/cvPrototyping/writeVideo_cpp_test.avi";
 
 	//fourcc integer
 

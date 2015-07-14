@@ -1,20 +1,17 @@
 import cv2
 import numpy as np
 import CameraTrapCV as CTCV
+import antigravity
 
-def diffImg(t0, t1, t2):
-  d1 = cv2.absdiff(t2, t1)
-  d2 = cv2.absdiff(t1, t0)
-  return cv2.bitwise_and(d1, d2)
 
 MIN_BLOB_SIZE = 200
 ctcv = CTCV.CameraTrapCV()
 
 cam = cv2.VideoCapture(0)
 
-t_minus = cv2.cvtColor(cam.read()[1], cv2.COLOR_RGB2GRAY)
+#t_minus = cv2.cvtColor(cam.read()[1], cv2.COLOR_RGB2GRAY)
 t = cv2.cvtColor(cam.read()[1], cv2.COLOR_RGB2GRAY)
-t_plus = cv2.cvtColor(cam.read()[1], cv2.COLOR_RGB2GRAY)
+#t_plus = cv2.cvtColor(cam.read()[1], cv2.COLOR_RGB2GRAY)
 
 f = t.copy()
 gray = t.copy()
@@ -26,26 +23,19 @@ avg = np.float32(f)
 while(1):
     #_,f = c.read()
   #img = f.copy()
+  '''
   mask = np.zeros(t.shape, dtype=np.uint8)
   height, width = t.shape
   cv2.circle(t, (312,262), 62, (0,0,0), -1)
   cv2.circle(mask, (312,262), 160, (255,255,255), -1)
 
   t = t & mask
-
-
-
-
-
-
+  '''
 
   f = cv2.GaussianBlur(f,(5,5),0)
   cv2.accumulateWeighted(f,avg,0.4)
   res = cv2.convertScaleAbs(avg)
-  #res1 = cv2.absdiff(t_minus, res.copy())
   res2 = cv2.absdiff(t, res.copy())
-  #res3 = cv2.absdiff(t_plus, res.copy())
-
   ret,img_grey2 = cv2.threshold( res2, 7, 255, cv2.THRESH_BINARY )
   img_grey2 = cv2.GaussianBlur(img_grey2,(5,5),0)
   ret2,img_grey2 = cv2.threshold( img_grey2, 240, 255, cv2.THRESH_BINARY )
@@ -57,19 +47,7 @@ while(1):
     # Get the largest contour
     contours, hierarchy = cv2.findContours(img_thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-    '''for cnt in contours:
-        cv2.drawContours(zeros, [cnt], 0,255,-1)
-'''
-    #gray = cv2.bitwise_not(t)
-    #kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(3,3))
-    #res = cv2.morphologyEx(gray,cv2.MORPH_OPEN,kernel)
-    
-
-
-
-
-    
-        # totally not from stack overflow
+    # totally not from stack overflow
     areas = [cv2.contourArea(c) for c in contours]
     i_max  = np.argmax(areas)
     max_index = ctcv.getLargestContourIndex(img_thresh)
@@ -86,17 +64,10 @@ while(1):
       theta = ctcv.getPolar(312,262, x_pos, y_pos)
       print theta
 
-
-
-
   #cv2.imshow('mask',mask)
   cv2.imshow('original',t)
   #cv2.imshow('img_thresh',img_thresh)
-  
-  
-  t_minus = t
-  t = t_plus
-  t_plus = cv2.cvtColor(cam.read()[1], cv2.COLOR_RGB2GRAY)
+  t = cv2.cvtColor(cam.read()[1], cv2.COLOR_RGB2GRAY)
   f = t.copy()
   k = cv2.waitKey(20)
  

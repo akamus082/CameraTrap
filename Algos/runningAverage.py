@@ -1,12 +1,10 @@
 import cv2
-#import cv2.cv as cv
 import numpy as np
-
 
 cam = cv2.VideoCapture(0)
 cam.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, 640)
 cam.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, 480)
-winName = "1", "2"
+winName = "1"
 got_frame, frame = cam.read()
 
 running_average_in_display = frame
@@ -18,7 +16,7 @@ while True:
   got_frame, frame = cam.read()
   
   #image to work with
-  display_image = frame
+  display_image = frame.copy()
   
   #smooth image
   blur = cv2.GaussianBlur(display_image,(5,5),0)
@@ -45,13 +43,10 @@ while True:
   non_black_coords_array = np.where( grey_image_as_array > 3 )
   non_black_coords_array = zip( non_black_coords_array[1], non_black_coords_array[0] )
 
-  points = []   # Was using this to hold either pixel coords or polygon coords.
   bounding_box_list = []
 
   contour,hier = cv2.findContours(img_grey,cv2.RETR_CCOMP,cv2.CHAIN_APPROX_SIMPLE)
 
-  #while contour:
-  '''  
   areas = [cv2.contourArea(c) for c in contour]
   max_index = np.argmax(areas)
   cnt=contour[max_index]
@@ -66,18 +61,17 @@ while True:
   cv2.fillPoly( img_grey, [ polygon_points ], (255,255,255) )
   cv2.polylines( display_image, [ polygon_points, ], 0, (255,255,255), 1, 0, 0 )
     
-    #contour = contour.h_next()
   '''
-
   areas = [cv2.contourArea(c) for c in contour]
   max_index = np.argmax(areas)
   cnt=contour[max_index]
-
+  '''
   x,y,w,h = cv2.boundingRect(cnt)
   cv2.rectangle(display_image,(x,y),(x+w,y+h),(0,255,0),2)
 
-  cv2.imshow( winName[0], frame )
-  cv2.imshow( winName[1], img_grey)
+  cv2.imshow( winName[0], display_image )
+  #cv2.imshow( winName[1], img_grey)
+  #cv2.imshow( winName[2], display_image)
 
   key = cv2.waitKey(10)
   if key == 27:

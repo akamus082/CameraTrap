@@ -1,9 +1,27 @@
 import cv2
 import numpy as np
+import cameraswitcher
+import time
+
+def lineSize(x1,y1,x2,y2):
+  x = abs(x1-x2)
+  y = abs(y1-y2)
+  r = (x ** 2 + y ** 2) ** 1/2
+  return r
+
 
 cam = cv2.VideoCapture(0)
-cam.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, 640)
-cam.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, 480)
+path = ('output.avi')
+
+cam.set(1, 20.0) #Match fps
+cam.set(3,640)   #Match width
+cam.set(4,480)   #Match height
+
+fourcc = cv2.cv.CV_FOURCC(*'DIV3')
+video_writer = cv2.VideoWriter(path,fourcc, 20.0, (640,480))
+
+#cam.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, 640)
+#cam.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, 480)
 winName = "1"
 got_frame, frame = cam.read()
 
@@ -57,17 +75,26 @@ while True:
         
   bounding_box_list.append( ( point1, point2 ) )
   polygon_points = cv2.approxPolyDP(cnt,0.1*cv2.arcLength(cnt,True),True)
-    
-  cv2.fillPoly( img_grey, [ polygon_points ], (255,255,255) )
-  cv2.polylines( display_image, [ polygon_points, ], 0, (255,255,255), 1, 0, 0 )
-    
+  if (polygon_points.size == 4):
+    r = lineSize(polygon_points[0][0][0],polygon_points[0][0][1], polygon_points[1][0][0], polygon_points[1][0][1] )
+    if (r > 10000):
+      cv2.fillPoly( img_grey, [ polygon_points ], (255,255,255) )
+      cv2.polylines( display_image, [ polygon_points, ], 0, (255,255,255), 1, 0, 0 )
+      x,y,w,h = cv2.boundingRect(cnt)
+      cv2.rectangle(display_image,(x,y),(x+w,y+h),(0,255,0),2)
+      video_writer.write(frame)
+
+
+  
+  
+ 
+
   '''
   areas = [cv2.contourArea(c) for c in contour]
   max_index = np.argmax(areas)
   cnt=contour[max_index]
   '''
-  x,y,w,h = cv2.boundingRect(cnt)
-  cv2.rectangle(display_image,(x,y),(x+w,y+h),(0,255,0),2)
+  
 
   cv2.imshow( winName[0], display_image )
   #cv2.imshow( winName[1], img_grey)

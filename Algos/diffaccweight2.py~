@@ -1,7 +1,11 @@
 import cv2
 import numpy as np
 import CameraTrapCV as CTCV
+<<<<<<< HEAD:Algos/diffaccweight2.py~
+import cameraswitcher
+=======
 import antigravity
+>>>>>>> db4a651260480c1b7b4a4b3b6969f48617c483a2:Algos/diffaccweight.py
 
 
 MIN_BLOB_SIZE = 200
@@ -20,6 +24,9 @@ avg = np.float32(f)
 # Read three images first:
 #fgbg = cv2.BackgroundSubtractorMOG()
 
+
+camera = cameraswitcher.Camera(0)
+
 while(1):
     #_,f = c.read()
   #img = f.copy()
@@ -31,6 +38,14 @@ while(1):
 
   t = t & mask
   '''
+<<<<<<< HEAD:Algos/diffaccweight2.py~
+
+
+
+
+
+=======
+>>>>>>> db4a651260480c1b7b4a4b3b6969f48617c483a2:Algos/diffaccweight.py
 
   f = cv2.GaussianBlur(f,(5,5),0)
   cv2.accumulateWeighted(f,avg,0.4)
@@ -47,10 +62,28 @@ while(1):
     # Get the largest contour
     contours, hierarchy = cv2.findContours(img_thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
+<<<<<<< HEAD:Algos/diffaccweight2.py~
+    '''for cnt in contours:
+        cv2.drawContours(zeros, [cnt], 0,255,-1)
+'''
+    #gray = cv2.bitwise_not(t)
+    #kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(3,3))
+    #res = cv2.morphologyEx(gray,cv2.MORPH_OPEN,kernel)
+    
+
+
+
+    
+        # totally not from stack overflow
+=======
     # totally not from stack overflow
+>>>>>>> db4a651260480c1b7b4a4b3b6969f48617c483a2:Algos/diffaccweight.py
     areas = [cv2.contourArea(c) for c in contours]
     i_max  = np.argmax(areas)
     max_index = ctcv.getLargestContourIndex(img_thresh)
+
+
+    
 
     # Make sure it's big enough
     if cv2.contourArea(contours[max_index]) >= MIN_BLOB_SIZE:
@@ -59,10 +92,18 @@ while(1):
       #print "img_out.shape = " + str(img_out.shape)
       x_pos, y_pos = ctcv.getCentroid(contours[max_index])
       cv2.circle(t, (x_pos, y_pos), 5, (0,0,0), -1)
-    
+
+      print "x_pos: " + str(x_pos)
+
+	
+
+      
       x_pos, y_pos = ctcv.getCentroid(ctcv.contours[max_index])
-      theta = ctcv.getPolar(312,262, x_pos, y_pos)
-      print theta
+      #theta = ctcv.getPolar(312,262, x_pos, y_pos)
+      #print theta
+
+    else: 
+      print "x_pos: NONE"
 
   #cv2.imshow('mask',mask)
   cv2.imshow('original',t)

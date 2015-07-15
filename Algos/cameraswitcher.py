@@ -4,8 +4,7 @@ import subprocess
 
 
 class Camera:
-	''' The shifter allows you to input a signal 
-	    and switch between cameras.'''
+    and switch between cameras.'''
 
 	def __init__(self, device_number):
 		self.filecount = 0;  # Number appended on each new video file.
@@ -21,8 +20,6 @@ class Camera:
 		# Name the output file.
 		filename = "dev" + str(self.dev) + "_output_" + str(self.filecount) + ".avi"
 		# Identify the linux command to turn on the camera.
-		subproc = "avconv -loglevel quiet -f video4linux2 -r 17 -i " + device + " " + filename
-
 		print "Filming with " + str(device)
 		print "writing file " + str(filename)
 		# Turn on the camera. This executes a shell command.

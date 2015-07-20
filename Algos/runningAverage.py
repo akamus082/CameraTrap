@@ -1,15 +1,14 @@
 import cv2
 import numpy as np
 import time
+import CameraTrapCV as CTCV
 
-def lineSize(x1,y1,x2,y2):
-  x = abs(x1-x2)
-  y = abs(y1-y2)
-  r = (x ** 2 + y ** 2) ** 1/2
-  return r
+
+ctcv = CTCV.CameraTrapCV()
 
 
 cam = cv2.VideoCapture(0)
+
 path = ('output.avi')
 
 cam.set(1, 20.0) #Match fps
@@ -66,14 +65,19 @@ while True:
   max_index = np.argmax(areas)
   cnt=contour[max_index]
   if (cv2.contourArea(contour[max_index]) > 5000):
+    
+    #x_pos, y_pos = ctcv.getCentroid(contour[max_index])
+    #print x_pos, y_pos
+    
     polygon_points = cv2.approxPolyDP(cnt,0.1*cv2.arcLength(cnt,True),True)
     bounding_rect = cv2.boundingRect( cnt )
     point1 = ( bounding_rect[0], bounding_rect[1] )
     point2 = ( bounding_rect[0] + bounding_rect[2], bounding_rect[1] + bounding_rect[3] )
     bounding_box_list.append( ( point1, point2 ) )
     cv2.fillPoly( img_grey, [ polygon_points ], (255,255,255) )
-    cv2.polylines( display_image, [ polygon_points, ], 0, (255,255,255), 1, 0, 0 )
+    #cv2.polylines( display_image, [ polygon_points, ], 0, (255,255,255), 1, 0, 0 )
     x,y,w,h = cv2.boundingRect(cnt)
+    print str(x+(w/2)) + ',' + str(y+(h/2))
     cv2.rectangle(display_image,(x,y),(x+w,y+h),(0,255,0),2)
     video_writer.write(frame)
 

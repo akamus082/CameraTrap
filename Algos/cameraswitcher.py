@@ -4,7 +4,7 @@ import subprocess
 
 
 class Camera:
-    and switch between cameras.'''
+    #and switch between cameras.
 
 	def __init__(self, device_number):
 		self.filecount = 0;  # Number appended on each new video file.

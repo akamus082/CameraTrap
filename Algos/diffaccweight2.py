@@ -5,7 +5,6 @@ import cameraswitcher
 import time
 import threading
 
-
 myCamera = cameraswitcher.Camera(0)
 
 

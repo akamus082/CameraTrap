@@ -1,25 +1,26 @@
 import cv2
 import numpy as np
-import time
-import CameraTrapCV as CTCV
+#import time
+#import sys
 
+#devnum = int(sys.argv[1])
+#filename = sys.argv[2]
 
-ctcv = CTCV.CameraTrapCV()
-
-
-cam = cv2.VideoCapture(0)
+cam0 = cv2.VideoCapture(0)
+cam1 = cv2.VideoCapture(1)
+#cam2 = cv2.VideoCapture(2)
 
 path = ('output.avi')
 
-cam.set(1, 20.0) #Match fps
-cam.set(3,640)   #Match width
-cam.set(4,480)   #Match height
+cam0.set(1, 20.0) #Match fps
+cam0.set(3,640)   #Match width
+cam0.set(4,480)   #Match height
 
 fourcc = cv2.cv.CV_FOURCC(*'DIV3')
 video_writer = cv2.VideoWriter(path,fourcc, 20.0, (640,480))
 
 winName = "1"
-got_frame, frame = cam.read()
+got_frame, frame = cam0.read()
 
 running_average_in_display = frame
 
@@ -27,7 +28,7 @@ avg = np.float32(frame)
 
 while True:
   
-  got_frame, frame = cam.read()
+  got_frame, frame = cam0.read()
   
   #image to work with
   display_image = frame.copy()
@@ -65,10 +66,6 @@ while True:
   max_index = np.argmax(areas)
   cnt=contour[max_index]
   if (cv2.contourArea(contour[max_index]) > 5000):
-    
-    #x_pos, y_pos = ctcv.getCentroid(contour[max_index])
-    #print x_pos, y_pos
-    
     polygon_points = cv2.approxPolyDP(cnt,0.1*cv2.arcLength(cnt,True),True)
     bounding_rect = cv2.boundingRect( cnt )
     point1 = ( bounding_rect[0], bounding_rect[1] )

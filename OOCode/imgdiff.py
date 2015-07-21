@@ -11,6 +11,9 @@ class ImgDiff(self):
 	return self.got_frame, self.frame
 
 	def imgDiff(self, frame):
+
+		running_average_in_display = frame
+		avg = np.float32(frame)
 		display_image = frame.copy()
 
 		#smooth image

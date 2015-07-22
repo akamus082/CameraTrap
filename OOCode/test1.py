@@ -9,8 +9,8 @@ c1 = False
 c2 = False
 
 myCamera0 = Camera.Camera(0, "cam0.avi")
-myCamera1 = Camera.Camera(2, "cam1.avi")
-myCamera2 = Camera.Camera(1, "cam2.avi")
+myCamera1 = Camera.Camera(1, "cam1.avi")
+myCamera2 = Camera.Camera(2, "cam2.avi")
 
 winName = "1", "2"
 #time.sleep(2)

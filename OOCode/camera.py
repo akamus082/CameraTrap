@@ -37,18 +37,21 @@ class Camera:
 	def getName(self):
 		return str(self.filename)
 
-'''
-
-myCamera = Camera(0, "mytestfile.avi")
-
-myCamera.on()
-time.sleep(5)
-print str(myCamera.isOn())
-print str(myCamera.isOff())
-time.sleep(5)
-myCamera.off()
+	def getDev(self):
+		return deviceNumber
 
 
-print "goodbye"
 
-'''
+# myCamera = Camera(0, "mytestfile.avi")
+
+# myCamera.on()
+# time.sleep(2)
+# print (myCamera.isOn() == True)
+# print (myCamera.isOff() == False)
+# time.sleep(2)
+# myCamera.off()
+# print myCamera.isOn()
+# print myCamera.isOff()
+
+# print "goodbye"
+

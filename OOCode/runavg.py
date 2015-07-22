@@ -50,6 +50,7 @@ def track(frame, running_average_in_display, avg):
 		cv2.fillPoly( img_grey, [ polygon_points ], (255,255,255) )
 		x,y,w,h = cv2.boundingRect(cnt)
 		x_pos, y_pos = ctcv.getCentroid(contour[max_index])
+		cv2.circle(display_image, (x_pos, y_pos), 3, (0,0,0), -1)
 		cv2.rectangle(display_image,(x,y),(x+w,y+h),(0,255,0),2)
 	#cv2.imshow( "2", display_image )
 		#return display_image, x_pos, y_pos

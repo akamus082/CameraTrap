@@ -1,10 +1,10 @@
 import numpy as np
 import cv2
-import runavg as ra
+import trackingalgos as ta
 import camera as Camera
 import time
 
-myCamera0 = Camera.Camera(0, "cam0.avi")
+myCamera0 = Camera.Camera('../videos/forest.mp4', "cam0.avi")
 
 winName = "1", "2"
 
@@ -33,10 +33,11 @@ while(myCamera0.isOn()):
 
 		#cv2.rectangle(frame_copy, (128, 0), (512, 480), (0,0,0), -1)
 		
-		masked_img0, x0, y0 = ra.runningAvg(frame_copy,running_average_in_display, avg_ra)
-		masked_img1, x1, y1 = ra.diffaccWeight(f,t,gray, avg_daw)
+		#masked_img0, x0, y0 = ta.runningAvg(frame_copy,running_average_in_display, avg_ra)
 		
-		cv2.imshow( winName[0], masked_img0 )
+		masked_img1, x1, y1 = ta.diffaccWeight(f,t,gray, avg_daw)
+		
+		#cv2.imshow( winName[0], masked_img0 )
 		cv2.imshow( winName[1], masked_img1 )
 		got_frame0, frame0 = myCamera0.getFrame()
 		

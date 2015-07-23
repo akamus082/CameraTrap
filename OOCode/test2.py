@@ -6,7 +6,7 @@ import time
 
 myCamera0 = Camera.Camera(0, "cam0.avi")
 
-winName = "1"
+winName = "1", "2"
 
 
 
@@ -20,11 +20,11 @@ while(myCamera0.isOn()):
 
 	t = cv2.cvtColor(frame0, cv2.COLOR_RGB2GRAY)
 	f = t.copy()
-	avg = np.float32(f)
+	avg_daw = np.float32(f)
 	gray = t.copy()
 	running_average_in_display = frame0
 	
-	#avg = np.float32(frame0)
+	avg_ra = np.float32(frame0)
 	
 	previous_x = center
 	
@@ -33,9 +33,11 @@ while(myCamera0.isOn()):
 
 		#cv2.rectangle(frame_copy, (128, 0), (512, 480), (0,0,0), -1)
 		
-		#masked_img, x, y = ra.track(frame_copy,running_average_in_display, avg)
-		masked_img, x, y = ra.diffaccWeight(f,t,gray, avg)
-		cv2.imshow( winName[0], masked_img )
+		masked_img0, x0, y0 = ra.runningAvg(frame_copy,running_average_in_display, avg_ra)
+		masked_img1, x1, y1 = ra.diffaccWeight(f,t,gray, avg_daw)
+		
+		cv2.imshow( winName[0], masked_img0 )
+		cv2.imshow( winName[1], masked_img1 )
 		got_frame0, frame0 = myCamera0.getFrame()
 		
 		'''delta_x = x - previous_x

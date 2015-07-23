@@ -1,10 +1,55 @@
 import cv2
 import numpy as np
 import CameraTrapCV as CTCV
-winName = "1"
 ctcv = CTCV.CameraTrapCV()
+MIN_BLOB_SIZE = 200
 
-def track(frame, running_average_in_display, avg):
+def diffaccWeight(f,t, gray, avg):
+	x_pos = 0
+	y_pos = 0
+	
+
+	# mask = np.zeros(t.shape, dtype=np.uint8)
+	# height, width = t.shape
+	# cv2.circle(t, (312,262), 62, (0,0,0), -1)
+	# cv2.circle(mask, (312,262), 160, (255,255,255), -1)
+	# t = t & mask
+
+
+	f = cv2.GaussianBlur(f,(5,5),0)
+	cv2.accumulateWeighted(f,avg,0.4)
+	res = cv2.convertScaleAbs(avg)
+	res2 = cv2.absdiff(t, res.copy())
+	ret,img_grey2 = cv2.threshold( res2, 7, 255, cv2.THRESH_BINARY )
+	img_grey2 = cv2.GaussianBlur(img_grey2,(5,5),0)
+	ret2,img_grey2 = cv2.threshold( img_grey2, 240, 255, cv2.THRESH_BINARY )
+
+	img_thresh = ctcv.bg_subtractor.apply(img_grey2, None, 0.05)
+
+	if np.count_nonzero(img_thresh) > 5:
+		# Get the largest contour
+		contours, hierarchy = cv2.findContours(img_thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+		# totally not from stack overflow
+		areas = [cv2.contourArea(c) for c in contours]
+		i_max  = np.argmax(areas)
+		max_index = ctcv.getLargestContourIndex(img_thresh)
+
+		# Make sure it's big enough
+		if cv2.contourArea(contours[max_index]) >= MIN_BLOB_SIZE:
+			img_out = np.zeros(img_thresh.shape).astype(np.uint8)
+			cv2.drawContours(t, contours, max_index, (255, 255, 255), -1)
+			#print "img_out.shape = " + str(img_out.shape)
+			x_pos, y_pos = ctcv.getCentroid(contours[max_index])
+			cv2.circle(t, (x_pos, y_pos), 5, (0,0,0), -1)
+
+			x_pos, y_pos = ctcv.getCentroid(ctcv.contours[max_index])
+			theta = ctcv.getPolar(312,262, x_pos, y_pos)
+
+	return t, x_pos, y_pos
+
+
+def runningAvg(frame, running_average_in_display, avg):
 	x_pos = 0
 	y_pos = 0
 	display_image = frame.copy()
@@ -52,7 +97,7 @@ def track(frame, running_average_in_display, avg):
 		x_pos, y_pos = ctcv.getCentroid(contour[max_index])
 		cv2.circle(display_image, (x_pos, y_pos), 3, (0,0,0), -1)
 		cv2.rectangle(display_image,(x,y),(x+w,y+h),(0,255,0),2)
-	#cv2.imshow( "2", display_image )
+		#cv2.imshow( "2", display_image )
 		#return display_image, x_pos, y_pos
 		return display_image, x_pos, y_pos
 	

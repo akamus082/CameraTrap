@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import CameraTrapCV as CTCV
 ctcv = CTCV.CameraTrapCV()
-MIN_BLOB_SIZE = 200
+MIN_BLOB_SIZE = 50
 
 # mask = np.zeros(t.shape, dtype=np.uint8)
 # height, width = t.shape
@@ -12,8 +12,8 @@ MIN_BLOB_SIZE = 200
 
 
 def diffaccWeight(f,t, gray, avg):
-	x_pos = 0
-	y_pos = 0
+	x_pos = -1
+	y_pos = -1
 	
 	f = cv2.GaussianBlur(f,(5,5),0)
 	cv2.accumulateWeighted(f,avg,0.4)

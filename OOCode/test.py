@@ -25,7 +25,7 @@ myCamera0 = Camera.Camera(0, "cam0.avi")
 myCamera1 = Camera.Camera(1, "cam1.avi")
 myCamera2 = Camera.Camera(2, "cam2.avi")
 
-winName = "1", "2"
+winName = "0", "1", "2"
 myCamera1.off()
 myCamera2.off()
 
@@ -145,20 +145,135 @@ while(myCamera0.isOn() or myCamera1.isOn() or myCamera2.isOn()):
 
 			if( (prev_x1 > 60) and (delta_x1 > 0) ):
 				myCamera0.off()
-				cv2.destroyWindow("1")
+				cv2.destroyWindow("0")
 			
 			
 			if( (prev_x0 < 580) and (delta_x0 < 0) ):
 				myCamera1.off()
+				cv2.destroyWindow("1")
+			
+
+			key = cv2.waitKey(10)
+			if key == 27:
+				cv2.destroyWindow("0")
+				cv2.destroyWindow("1")
+				myCamera0.off()
+				myCamera1.off()
+				break
+
+
+	if(myCamera0.isOn() and myCamera2.isOn()):
+		print "camera 0 and 2 are on"
+		
+		kalman2d0 = Kalman2D()
+		kalman2d2 = Kalman2D()
+
+		measured_points0 = []
+		measured_points2 = []
+		kalman_points0 = []
+		kalman_points2 = []
+		
+		got_frame0, frame0 = myCamera0.getFrame()
+		got_frame2, frame2 = myCamera2.getFrame()
+		
+		running_average_in_display0 = frame0
+		running_average_in_display2 = frame2
+
+		t0 = cv2.cvtColor(frame0, cv2.COLOR_RGB2GRAY)
+		t2 = cv2.cvtColor(frame2, cv2.COLOR_RGB2GRAY)
+
+		f0 = t0.copy()
+		f2 = t2.copy()
+
+		gray0 = t0.copy()
+		gray2 = t2.copy()
+
+		#avg_ra = np.float32(frame0)
+		avg_daw0 = np.float32(f0)
+		avg_daw2 = np.float32(f2)
+
+		while myCamera0.isOn() and myCamera2.isOn():
+			frame_copy0 = frame0.copy()
+			frame_copy2 = frame2.copy()
+			t0 = cv2.cvtColor(frame0, cv2.COLOR_RGB2GRAY)
+			t2 = cv2.cvtColor(frame2, cv2.COLOR_RGB2GRAY)
+
+			f0 = t0.copy()
+			f2 = t2.copy()
+			gray0 = t0.copy()
+			gray2 = t2.copy()
+
+			#cv2.rectangle(frame_copy, (128, 0), (512, 480), (0,0,0), -1)
+			
+			#masked_img, x, y = ta.runningAvg(frame_copy,running_average_in_display, avg_ra)
+			masked_img0, x0, y0 = ta.diffaccWeight(f0,t0,gray0, avg_daw0)
+			masked_img2, x2, y2 = ta.diffaccWeight(f2,t2,gray2, avg_daw2)
+
+
+			if((x0 != -1) | (y0 != -1)):
+				measured0 = (x0,y0)
+				prev_x0 = x0
+				prev_y0 = y0
+			else:
+				measured0 = (prev_x0,prev_y0)
+
+			if((x2 != -1) | (y2 != -1)):
+				measured1 = (x2,y2)
+				prev_x2 = x2
+				prev_y2 = y2
+			else:
+				measured2 = (prev_x2,prev_y2)
+
+
+			measured_points0.append(measured0)
+			measured_points2.append(measured2)
+			
+			kalman2d0.update(measured0[0], measured0[1])
+			kalman2d2.update(measured2[0], measured2[1])
+
+			estimated0 = [int (c) for c in kalman2d0.getEstimate()]
+			
+			estimated2 = [int (a) for a in kalman2d2.getEstimate()]
+
+			kalman_points0.append(estimated0)
+			kalman_points2.append(estimated2)
+
+			drawCross(frame0, estimated0, 255, 255, 255)
+			drawCross(frame2, estimated2, 255, 255, 255)
+			
+			drawCross(frame0, measured0, 0,   0,   255)
+			drawCross(frame2, measured2, 0,   0,   255)
+
+			print "prev_x2", prev_x2
+
+
+			cv2.imshow( winName[0], frame0 )
+			cv2.imshow( winName[2], frame2 )
+
+
+			got_frame0, frame0 = myCamera0.getFrame()
+			got_frame2, frame2 = myCamera2.getFrame()
+
+			delta_x0 = prev_x0 - estimated0[0]
+			delta_x2 = prev_x2 - estimated2[0]
+
+			
+			if( (prev_x2 <= 580) and (delta_x2 < 0) ):
+				myCamera0.off()
+				cv2.destroyWindow("0")
+			
+			
+			if( (prev_x0 > 60) and (delta_x0 > 0) ):
+				myCamera2.off()
 				cv2.destroyWindow("2")
 			
 
 			key = cv2.waitKey(10)
 			if key == 27:
-				cv2.destroyWindow("1")
+				cv2.destroyWindow("0")
 				cv2.destroyWindow("2")
 				myCamera0.off()
-				myCamera1.off()
+				myCamera2.off()
 				break
 	
 
@@ -227,10 +342,17 @@ while(myCamera0.isOn() or myCamera1.isOn() or myCamera2.isOn()):
 					prev_x0 = 640
 					prev_x1 = 0
 
+				if((delta_x < 0) and (estimated[0] <= 60)):
+					print "turn camera 2 on"
+					myCamera2.on()
+					myCamera2.getFrame()
+					prev_x0 = 0
+					prev_x2 = 640
+
 
 			key = cv2.waitKey(10)
 			if key == 27:
-				cv2.destroyWindow("1")
+				cv2.destroyWindow("0")
 				myCamera0.off()
 				break
 
@@ -259,7 +381,6 @@ while(myCamera0.isOn() or myCamera1.isOn() or myCamera2.isOn()):
 			#cv2.rectangle(frame_copy, (128, 0), (512, 480), (0,0,0), -1)
 			#masked_img, x, y = ta.runningAvg(frame_copy,running_average_in_display, avg_ra)
 			masked_img1, x1, y1 = ta.diffaccWeight(f,t,gray, avg_daw)
-			#print "x = %d  prevx = %d",  x, previous_x
 
 			if((x1 != -1) | (y1 != -1)):
 				measured = (x1,y1)
@@ -301,49 +422,72 @@ while(myCamera0.isOn() or myCamera1.isOn() or myCamera2.isOn()):
 				break
 	
 	
-	'''
-	if(myCamera2.isOn()):
+	
+	if(myCamera2.isOn() and myCamera0.isOff() and myCamera1.isOff()):
 		print "camera 2 is on"
-
+		kalman2d2 = Kalman2D()
+		measured_points = []
+		kalman_points = []
+		
 		got_frame2, frame2 = myCamera2.getFrame()
+		
 		running_average_in_display = frame2
 		t = cv2.cvtColor(frame2, cv2.COLOR_RGB2GRAY)
 		f = t.copy()
 		gray = t.copy()
-		avg_ra = np.float32(frame2)
+		#avg_ra = np.float32(frame1)
 		avg_daw = np.float32(f)
 
-		previous_x = center
-
-		while got_frame2:
+		while (myCamera2.isOn() and myCamera0.isOff() and myCamera1.isOff()):
 			frame_copy = frame2.copy()
 			t = cv2.cvtColor(frame2, cv2.COLOR_RGB2GRAY)
 			f = t.copy()
 			gray = t.copy()
+			
 			#cv2.rectangle(frame_copy, (128, 0), (512, 480), (0,0,0), -1)
 			#masked_img, x, y = ta.runningAvg(frame_copy,running_average_in_display, avg_ra)
-			masked_img, x, y = ta.diffaccWeight(f,t,gray, avg_daw)
-			#print "x = %d  prevx = %d",  x, previous_x
+			masked_img2, x2, y2 = ta.diffaccWeight(f,t,gray, avg_daw)
 
-			cv2.imshow( winName[0], masked_img )
+			if((x2 != -1) | (y2 != -1)):
+				measured = (x2,y2)
+				prev_x2 = x2
+				prev_y2 = y2
+			else:
+				measured = (prev_x2,prev_y2)
+
+			measured_points.append(measured)
+			kalman2d2.update(measured[0], measured[1])
+
+			estimated = [int (c) for c in kalman2d2.getEstimate()]
+
+			kalman_points.append(estimated)
+
+			#print 'estimated', estimated[0]
+			drawCross(frame2, estimated, 255, 255, 255)
+			drawCross(frame2, measured, 0,   0,   255)
+
+			cv2.imshow( winName[2], frame2 )
+
 			got_frame2, frame2 = myCamera2.getFrame()
-			print "x " + str(x)
-			print "previous " + str(previous_x)
-			delta_x = x - previous_x
-			print "delta " + str(delta_x)
-			
-			if(x):
-				if((delta_x > 0) and (x > 580)):
-					myCamera0.on()
-					myCamera2.off()
 
-			previous_x = x
+			delta_x = prev_x2 - estimated[0]
+
+			
+			if(estimated[0] > 0):
+				
+				if((delta_x > 0) and (estimated[0] >= 580)):
+					print "turn camera 0 on"
+					myCamera0.on()
+					#myCamera2.off()
+			
+			
+
 			key = cv2.waitKey(10)
 			if key == 27:
-				cv2.destroyWindow("1")
+				cv2.destroyWindow("2")
 				myCamera2.off()
 				break
-				'''
+	
 
 
 

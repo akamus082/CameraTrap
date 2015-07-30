@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import CameraTrapCV as CTCV
 ctcv = CTCV.CameraTrapCV()
-MIN_BLOB_SIZE = 1000
+MIN_BLOB_SIZE = 50
 
 # mask = np.zeros(t.shape, dtype=np.uint8)
 # height, width = t.shape

@@ -2,14 +2,13 @@ import cv2
 import numpy as np
 import CameraTrapCV as CTCV
 ctcv = CTCV.CameraTrapCV()
-MIN_BLOB_SIZE = 50
+MIN_BLOB_SIZE = 1000
 
 # mask = np.zeros(t.shape, dtype=np.uint8)
 # height, width = t.shape
 # cv2.circle(t, (312,262), 62, (0,0,0), -1)
 # cv2.circle(mask, (312,262), 160, (255,255,255), -1)
 # t = t & mask
-
 
 def diffaccWeight(f,t, gray, avg):
 	x_pos = -1

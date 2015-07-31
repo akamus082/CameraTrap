@@ -29,16 +29,12 @@ winName = "0", "1", "2"
 print "preparing cameras"
 kalman2d0 = Kalman2D()
 measured_points0 = []
-kalman_points0 = []
 
 kalman2d1 = Kalman2D()
 measured_points1 = []
-kalman_points1 = []
 
 kalman2d2 = Kalman2D()
 measured_points2 = []
-kalman_points2 = []
-
 
 measured0 = (0,0)
 measured1 = (0,0)
@@ -68,7 +64,6 @@ prev_y2= int(480/2)
 
 while(myCamera0.isOn() or myCamera1.isOn() or myCamera2.isOn()):
 	
-	'''
 	while myCamera0.isOn() and myCamera1.isOn():
 		
 		got_frame0, frame0 = myCamera0.getFrame()
@@ -110,9 +105,6 @@ while(myCamera0.isOn() or myCamera1.isOn() or myCamera2.isOn()):
 		
 		estimated1 = [int (a) for a in kalman2d1.getEstimate()]
 
-		kalman_points0.append(estimated0)
-		kalman_points1.append(estimated1)
-
 		drawCross(frame0, estimated0, 255, 255, 255)
 		drawCross(frame1, estimated1, 255, 255, 255)
 		
@@ -121,9 +113,6 @@ while(myCamera0.isOn() or myCamera1.isOn() or myCamera2.isOn()):
 
 		cv2.imshow( winName[0], frame0 )
 		cv2.imshow( winName[1], frame1 )
-
-
-
 
 		delta_x0 = prev_x0 - estimated0[0]
 		delta_x1 = prev_x1 - estimated1[0]
@@ -148,7 +137,7 @@ while(myCamera0.isOn() or myCamera1.isOn() or myCamera2.isOn()):
 			myCamera0.off()
 			myCamera1.off()
 			break
-	'''
+	
 
 	while myCamera0.isOn() and myCamera2.isOn():
 
@@ -191,9 +180,6 @@ while(myCamera0.isOn() or myCamera1.isOn() or myCamera2.isOn()):
 
 		estimated0 = [int (c) for c in kalman2d0.getEstimate()]
 		estimated2 = [int (a) for a in kalman2d2.getEstimate()]
-
-		kalman_points0.append(estimated0)
-		kalman_points2.append(estimated2)
 
 		drawCross(frame0, estimated0, 255, 255, 255)
 		drawCross(frame2, estimated2, 255, 255, 255)
@@ -248,8 +234,6 @@ while(myCamera0.isOn() or myCamera1.isOn() or myCamera2.isOn()):
 
 		estimated0 = [int (c) for c in kalman2d0.getEstimate()]
 
-		kalman_points0.append(estimated0)
-
 		drawCross(frame0, estimated0, 255, 255, 255)
 		drawCross(frame0, measured0, 0,   0,   255)
 
@@ -261,10 +245,10 @@ while(myCamera0.isOn() or myCamera1.isOn() or myCamera2.isOn()):
 		if(prev_x0 > 0):
 			
 
-			# if((delta_x0 > 0) and (prev_x0 >= 580)):
-			# 	print "turn camera 1 on"
-			# 	myCamera1.on()
-			# 	prev_x1 = int(640/2)
+			if((delta_x0 > 0) and (prev_x0 >= 580)):
+				print "turn camera 1 on"
+				myCamera1.on()
+				prev_x1 = int(640/2)
 
 			
 			if((delta_x0 < 0) and (prev_x0 <= 60)):
@@ -280,7 +264,7 @@ while(myCamera0.isOn() or myCamera1.isOn() or myCamera2.isOn()):
 			break
 
 	
-	'''
+	
 	while (myCamera1.isOn() and myCamera0.isOff() and myCamera2.isOff()):
 		
 		got_frame1, frame1 = myCamera1.getFrame()
@@ -300,8 +284,6 @@ while(myCamera0.isOn() or myCamera1.isOn() or myCamera2.isOn()):
 
 		estimated1 = [int (c) for c in kalman2d1.getEstimate()]
 
-		kalman_points1.append(estimated1)
-
 		drawCross(frame1, estimated1, 255, 255, 255)
 		drawCross(frame1, measured1, 0,   0,   255)
 
@@ -319,7 +301,7 @@ while(myCamera0.isOn() or myCamera1.isOn() or myCamera2.isOn()):
 			cv2.destroyWindow("1")
 			myCamera1.off()
 			break
-	'''
+	
 	
 	
 	while (myCamera2.isOn() and myCamera0.isOff() and myCamera1.isOff()):
@@ -339,8 +321,6 @@ while(myCamera0.isOn() or myCamera1.isOn() or myCamera2.isOn()):
 		kalman2d2.update(measured2[0], measured2[1])
 
 		estimated2 = [int (c) for c in kalman2d2.getEstimate()]
-
-		kalman_points2.append(estimated2)
 
 		drawCross(frame2, estimated2, 255, 255, 255)
 		drawCross(frame2, measured2, 0,   0,   255)

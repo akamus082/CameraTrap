@@ -4,13 +4,7 @@ import CameraTrapCV as CTCV
 ctcv = CTCV.CameraTrapCV()
 MIN_BLOB_SIZE = 50
 
-# mask = np.zeros(t.shape, dtype=np.uint8)
-# height, width = t.shape
-# cv2.circle(t, (312,262), 62, (0,0,0), -1)
-# cv2.circle(mask, (312,262), 160, (255,255,255), -1)
-# t = t & mask
-
-def diffaccWeight(f,t, gray, avg):
+def diffaccWeight(f,t, avg):
 	x_pos = -1
 	y_pos = -1
 	
@@ -37,12 +31,7 @@ def diffaccWeight(f,t, gray, avg):
 		if cv2.contourArea(contours[max_index]) >= MIN_BLOB_SIZE:
 			img_out = np.zeros(img_thresh.shape).astype(np.uint8)
 			cv2.drawContours(t, contours, max_index, (255, 255, 255), -1)
-			#print "img_out.shape = " + str(img_out.shape)
 			x_pos, y_pos = ctcv.getCentroid(contours[max_index])
-			cv2.circle(t, (x_pos, y_pos), 5, (0,0,0), -1)
-
-			x_pos, y_pos = ctcv.getCentroid(ctcv.contours[max_index])
-			theta = ctcv.getPolar(312,262, x_pos, y_pos)
 
 	return t, x_pos, y_pos
 

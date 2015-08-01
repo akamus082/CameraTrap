@@ -1,0 +1,41 @@
+%Apply foreground detection to calculate what is part of the foreground
+%Apply blob analysis to acquire information about the foreground blobs that
+%we are interested in
+
+videoReader=vision.VideoFileReader('forest.mp4');
+videoPlayer=vision.VideoPlayer('Position',[100,100,500,400]);
+foregroundDetector=vision.ForegroundDetector('NumTrainingFrames',10,'InitialVariance',0.6);
+blobAnalyzer= vision.BlobAnalysis('AreaOutputPort', false, 'MinimumBlobArea',100, 'PerimeterOutputPort',false, 'BoundingBoxOutputPort',false, 'Connectivity', 4 );
+
+
+%Configure Kalman Filter applying blob detection and foreground masks
+kalmanFilter = []; isTrackInitialized = false;
+while ~isDone(videoReader)
+     newImage  = step(videoReader);
+
+     foregroundMask = step(foregroundDetector, rgb2gray(newImage));
+     detectedLocation = step(blobAnalyzer,foregroundMask);
+     isObjectDetected = size(detectedLocation, 1) > 0;
+
+     if ~isTrackInitialized
+       if isObjectDetected
+         kalmanFilter = configureKalmanFilter('ConstantVelocity',detectedLocation(1,:), [200, 50], [100, 25], 100);
+         isTrackInitialized = true;
+       end
+       label = ''; circle = [];
+     else
+       if isObjectDetected
+         predict(kalmanFilter);
+         trackedLocation = correct(kalmanFilter, detectedLocation(1,:));
+         label = 'Corrected';
+       else
+         trackedLocation = predict(kalmanFilter);
+         label = 'Predicted';
+       end
+       circle = [trackedLocation, 5];
+     end
+     newImage = insertObjectAnnotation(newImage,'circle',circle,label,'Color','yellow');
+     step(videoPlayer,newImage);
+end
+release(videoPlayer);
+release(videoReader);

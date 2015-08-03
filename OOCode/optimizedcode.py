@@ -64,7 +64,7 @@ prev_y2= int(480/2)
 
 while(myCamera0.isOn() or myCamera1.isOn() or myCamera2.isOn()):
 	
-	while myCamera0.isOn() and myCamera1.isOn():
+	while myCamera0.isOn() and myCamera1.isOn() and myCamera2.isOff():
 		
 		got_frame0, frame0 = myCamera0.getFrame()
 		got_frame1, frame1 = myCamera1.getFrame()
@@ -118,17 +118,25 @@ while(myCamera0.isOn() or myCamera1.isOn() or myCamera2.isOn()):
 		delta_x1 = prev_x1 - estimated1[0]
 
 
-		if((delta_x1 < 0) and (estimated1[0] <= 60)):
+		if((delta_x1 < 0) and (estimated1[0] <= 40)):
 			print "turn camera 0 off"
 			myCamera1.off()
 			cv2.destroyWindow("1")
 			prev_x0 = int(640/2)
 		
-		if((delta_x0 > 0) and (estimated0[0] >= 580)):
+		if((delta_x0 > 0) and (estimated0[0] >= 600)):
 			print "turn camera 0 off"
 			myCamera0.off()
 			cv2.destroyWindow("0")
-			prev_x1 = int(640/2)	
+			prev_x1 = int(640/2)
+
+		if(estimated0[0] < (640/2) ):
+			myCamera1.off()
+			cv2.destroyWindow("1")
+		if(estimated1[0] > (640/2) ):
+			myCamera0.off()
+			cv2.destroyWindow("0")
+
 
 		key = cv2.waitKey(10)
 		if key == 27:
@@ -139,7 +147,7 @@ while(myCamera0.isOn() or myCamera1.isOn() or myCamera2.isOn()):
 			break
 	
 
-	while myCamera0.isOn() and myCamera2.isOn():
+	while myCamera0.isOn() and myCamera2.isOn() and myCamera1.isOff():
 
 		got_frame0, frame0 = myCamera0.getFrame()
 		got_frame2, frame2 = myCamera2.getFrame()
@@ -193,17 +201,27 @@ while(myCamera0.isOn() or myCamera1.isOn() or myCamera2.isOn()):
 		delta_x0 = prev_x0 - estimated0[0]
 		delta_x2 = prev_x2 - estimated2[0]
 
-		if((delta_x2 > 0) and (estimated2[0] >= 580)):
+		
+		if((delta_x2 > 0) and (estimated2[0] >= 600)):
 			print "turn camera 2 off"
 			myCamera2.off()
 			cv2.destroyWindow("2")
 			prev_x0 = int(640/2)
 		
-		if((delta_x0 < 0) and (estimated0[0] <= 60)):
+		if((delta_x0 < 0) and (estimated0[0] <= 40)):
 			print "turn camera 0 off"
 			myCamera0.off()
 			cv2.destroyWindow("0")
 			prev_x2 = int(640/2)
+
+		
+		if(estimated0[0] > (640/2) ):
+			myCamera2.off()
+			cv2.destroyWindow("2")
+		
+		if(estimated2[0] < (640/2) ):
+			myCamera0.off()
+			cv2.destroyWindow("0")
 		
 		key = cv2.waitKey(10)
 		if key == 27:
@@ -245,13 +263,13 @@ while(myCamera0.isOn() or myCamera1.isOn() or myCamera2.isOn()):
 		if(prev_x0 > 0):
 			
 
-			if((delta_x0 > 0) and (prev_x0 >= 580)):
+			if((delta_x0 > 0) and (prev_x0 >= 600)):
 				print "turn camera 1 on"
 				myCamera1.on()
 				prev_x1 = int(640/2)
 
 			
-			if((delta_x0 < 0) and (prev_x0 <= 60)):
+			if((delta_x0 < 0) and (prev_x0 <= 40)):
 				print "turn camera 2 on"
 				myCamera2.on()
 				prev_x2 = int(640/2)
@@ -292,7 +310,7 @@ while(myCamera0.isOn() or myCamera1.isOn() or myCamera2.isOn()):
 
 		if(prev_x1 > 0):
 			
-			if((delta_x1 < 0) and (prev_x1 <= 60)):
+			if((delta_x1 < 0) and (prev_x1 <= 40)):
 				print "turn camera 0 on"
 				myCamera0.on()
 				
@@ -332,7 +350,7 @@ while(myCamera0.isOn() or myCamera1.isOn() or myCamera2.isOn()):
 		
 		if(estimated2[0] > 0):
 			
-			if((delta_x2 > 0) and (prev_x2 >= 580)):
+			if((delta_x2 > 0) and (prev_x2 >= 600)):
 				print "turn camera 0 on"
 				myCamera0.on()
 		

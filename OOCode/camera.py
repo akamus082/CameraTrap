@@ -10,6 +10,9 @@ class Camera:
 		self.filecount = 0
 		#self.inUse = False
 		self.cap = cv2.VideoCapture(self.devNum)
+		self.cap.set(5, 30)
+		self.cap.set(3, 640)
+		self.cap.set(4, 480)
 
 	def on(self):
 		# turn the camera on

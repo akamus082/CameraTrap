@@ -19,6 +19,7 @@ import cv2
 import trackingalgos as ta
 import camera as Camera
 from kalman2d import Kalman2D
+import time
 
 myCamera0 = Camera.Camera(0, "cam0.avi")
 myCamera1 = Camera.Camera(1, "cam1.avi")
@@ -43,15 +44,17 @@ measured2 = (0,0)
 got_frame0, frame0 = myCamera0.getFrame()
 t0 = cv2.cvtColor(frame0, cv2.COLOR_RGB2GRAY)
 avg_daw0 = np.float32(t0)
-
+time.sleep(1)
+'''
 got_frame1, frame1 = myCamera1.getFrame()
 t1 = cv2.cvtColor(frame1, cv2.COLOR_RGB2GRAY)
 avg_daw1 = np.float32(t1)
-
+time.sleep(1)
 got_frame2, frame2 = myCamera2.getFrame()
 t2 = cv2.cvtColor(frame2, cv2.COLOR_RGB2GRAY)
 avg_daw2 = np.float32(t2)
-
+time.sleep(1)
+'''
 myCamera1.off()
 myCamera2.off()
 

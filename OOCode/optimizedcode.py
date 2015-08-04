@@ -138,7 +138,7 @@ while(myCamera0.isOn() or myCamera1.isOn() or myCamera2.isOn()):
 			cv2.destroyWindow("0")
 
 
-		key = cv2.waitKey(10)
+		key = cv2.waitKey(1)
 		if key == 27:
 			cv2.destroyWindow("0")
 			cv2.destroyWindow("1")
@@ -223,7 +223,7 @@ while(myCamera0.isOn() or myCamera1.isOn() or myCamera2.isOn()):
 			myCamera0.off()
 			cv2.destroyWindow("0")
 		
-		key = cv2.waitKey(10)
+		key = cv2.waitKey(1)
 		if key == 27:
 			cv2.destroyWindow("0")
 			cv2.destroyWindow("2")
@@ -275,7 +275,7 @@ while(myCamera0.isOn() or myCamera1.isOn() or myCamera2.isOn()):
 				prev_x2 = int(640/2)
 			
 
-		key = cv2.waitKey(10)
+		key = cv2.waitKey(1)
 		if key == 27:
 			cv2.destroyWindow("0")
 			myCamera0.off()
@@ -314,7 +314,7 @@ while(myCamera0.isOn() or myCamera1.isOn() or myCamera2.isOn()):
 				print "turn camera 0 on"
 				myCamera0.on()
 				
-		key = cv2.waitKey(10)
+		key = cv2.waitKey(1)
 		if key == 27:
 			cv2.destroyWindow("1")
 			myCamera1.off()
@@ -355,7 +355,7 @@ while(myCamera0.isOn() or myCamera1.isOn() or myCamera2.isOn()):
 				myCamera0.on()
 		
 
-		key = cv2.waitKey(10)
+		key = cv2.waitKey(1)
 		if key == 27:
 			cv2.destroyWindow("2")
 			myCamera2.off()

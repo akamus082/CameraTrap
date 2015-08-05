@@ -21,6 +21,8 @@ import camera as Camera
 from kalman2d import Kalman2D
 import time
 
+print 'hello world :)'
+
 myCamera0 = Camera.Camera(0, "cam0.avi")
 myCamera1 = Camera.Camera(1, "cam1.avi")
 myCamera2 = Camera.Camera(2, "cam2.avi")
@@ -41,56 +43,46 @@ measured0 = (0,0)
 measured1 = (0,0)
 measured2 = (0,0)
 
-got_frame0, frame0 = myCamera0.getFrame()
-image0 = cv2.resize(frame0,None,fx=0.25, fy=0.25, interpolation = cv2.INTER_LINEAR)
-t0 = cv2.cvtColor(image0, cv2.COLOR_RGB2GRAY)
-#t0 = cv2.cvtColor(frame0, cv2.COLOR_RGB2GRAY)
+got_frame0, frame0 = myCamera0.getFrameLowRes()
+t0 = cv2.cvtColor(frame0, cv2.COLOR_RGB2GRAY)
 avg_daw0 = np.float32(t0)
 myCamera0.off()
 
-got_frame1, frame1 = myCamera1.getFrame()
-image1 = cv2.resize(frame1,None,fx=0.25, fy=0.25, interpolation = cv2.INTER_LINEAR)
-t1 = cv2.cvtColor(image1, cv2.COLOR_RGB2GRAY)
-#t1 = cv2.cvtColor(frame1, cv2.COLOR_RGB2GRAY)
+got_frame1, frame1 = myCamera1.getFrameLowRes()
+t1 = cv2.cvtColor(frame1, cv2.COLOR_RGB2GRAY)
 avg_daw1 = np.float32(t1)
 myCamera1.off()
 
-got_frame2, frame2 = myCamera2.getFrame()
-image2 = cv2.resize(frame2,None,fx=0.25, fy=0.25, interpolation = cv2.INTER_LINEAR)
-t2 = cv2.cvtColor(image2, cv2.COLOR_RGB2GRAY)
-#t2 = cv2.cvtColor(frame2, cv2.COLOR_RGB2GRAY)
+got_frame2, frame2 = myCamera2.getFrameLowRes()
+t2 = cv2.cvtColor(frame2, cv2.COLOR_RGB2GRAY)
 avg_daw2 = np.float32(t2)
 myCamera2.off()
 
-myCamera0.on()
-prev_x0 = int(image0.shape[1]/2)
-prev_x1 = int(image1.shape[1]/2)
-prev_x2 = int(image2.shape[1]/2)
-prev_y0= int(image0.shape[0]/2)
-prev_y1= int(image1.shape[0]/2)
-prev_y2= int(image2.shape[0]/2)
+# This assumes the sizes of the frames are identical for all
+# cameras. Otherwise, do this for each camera.
+triggerWidthRight = frame0.shape[1]*0.9
+triggerWidthLeft = frame0.shape[1]*0.1
+centerx = int(frame0.shape[1]/2)
 
-# prev_x0 = int(640/2)
-# prev_x1 = int(640/2)
-# prev_x2 = int(640/2)
-# prev_y0= int(480/2)
-# prev_y1= int(480/2)
-# prev_y2= int(480/2)
+prev_x0 = centerx
+prev_x1 = centerx
+prev_x2 = centerx
+prev_y0= int(480/2)
+prev_y1= int(480/2)
+prev_y2= int(480/2)
+
+
+myCamera0.on()
 
 while(myCamera0.isOn() or myCamera1.isOn() or myCamera2.isOn()):
 	
 	while myCamera0.isOn() and myCamera1.isOn() and myCamera2.isOff():
 		
-		got_frame0, frame0 = myCamera0.getFrame()
-		image0 = cv2.resize(frame0,None,fx=0.25, fy=0.25, interpolation = cv2.INTER_LINEAR)
-		t0 = cv2.cvtColor(image0, cv2.COLOR_RGB2GRAY)
-		
-		got_frame1, frame1 = myCamera1.getFrame()
-		image1 = cv2.resize(frame1,None,fx=0.25, fy=0.25, interpolation = cv2.INTER_LINEAR)
-		t1 = cv2.cvtColor(image1, cv2.COLOR_RGB2GRAY)
-		
-		# t0 = cv2.cvtColor(frame0, cv2.COLOR_RGB2GRAY)
-		# t1 = cv2.cvtColor(frame1, cv2.COLOR_RGB2GRAY)
+		got_frame0, frame0 = myCamera0.getAndWriteFrame()
+		got_frame1, frame1 = myCamera1.getAndWriteFrame()
+
+		t0 = cv2.cvtColor(frame0, cv2.COLOR_RGB2GRAY)
+		t1 = cv2.cvtColor(frame1, cv2.COLOR_RGB2GRAY)
 
 		f0 = t0.copy()
 		f1 = t1.copy()
@@ -124,45 +116,39 @@ while(myCamera0.isOn() or myCamera1.isOn() or myCamera2.isOn()):
 		
 		estimated1 = [int (a) for a in kalman2d1.getEstimate()]
 
-		drawCross(image0, estimated0, 255, 255, 255)
-		drawCross(image1, estimated1, 255, 255, 255)
-		drawCross(image0, measured0, 0,   0,   255)
-		drawCross(image1, measured1, 0,   0,   255)
+		drawCross(frame0, estimated0, 255, 255, 255)
+		drawCross(frame1, estimated1, 255, 255, 255)
+		
+		drawCross(frame0, measured0, 0,   0,   255)
+		drawCross(frame1, measured1, 0,   0,   255)
 
-		# drawCross(frame0, estimated0, 0,   0,   255)
-		# drawCross(frame1, estimated1, 0,   0,   255)
-		# drawCross(frame0, measured0, 0,   0,   255)
-		# drawCross(frame1, measured1, 0,   0,   255)
-
-		cv2.imshow( winName[0], image0 )
-		cv2.imshow( winName[1], image1 )
-		# cv2.imshow( winName[0], frame0 )
-		# cv2.imshow( winName[1], frame1 )
+		cv2.imshow( winName[0], frame0 )
+		cv2.imshow( winName[1], frame1 )
 
 		delta_x0 = prev_x0 - estimated0[0]
 		delta_x1 = prev_x1 - estimated1[0]
 
-		
-		if((delta_x1 < 0) and (estimated1[0] <= (image1.shape[1]*0.1))):
-			print "turn camera 0 off"
-			myCamera1.off()
-			cv2.destroyWindow("1")
-			prev_x0 = int(640/2)
-		
-		if(estimated1[0] > (image1.shape[1]/2) ):
-			myCamera0.off()
-			cv2.destroyWindow("0")
-		
-		if(estimated0[0] < (image0.shape[1]/2) ):
-			myCamera1.off()
-			cv2.destroyWindow("1")
 
-		if((delta_x0 > 0) and (estimated0[0] >= (image0.shape[1]*0.9))):
+		if((delta_x1 < 0) and (estimated1[0] <= triggerWidthLeft)):
+			print "turn camera 0 off"
+			myCamera1.off()
+			cv2.destroyWindow("1")
+			prev_x0 = centerx
+		
+		if((delta_x0 > 0) and (estimated0[0] >= triggerWidthRight)):
 			print "turn camera 0 off"
 			myCamera0.off()
 			cv2.destroyWindow("0")
-			prev_x1 = int(640/2)
-		
+			prev_x1 = centerx
+
+		if(estimated0[0] < centerx ):
+			myCamera1.off()
+			cv2.destroyWindow("1")
+		if(estimated1[0] > centerx ):
+			myCamera0.off()
+			cv2.destroyWindow("0")
+
+
 		key = cv2.waitKey(1)
 		if key == 27:
 			cv2.destroyWindow("0")
@@ -174,16 +160,11 @@ while(myCamera0.isOn() or myCamera1.isOn() or myCamera2.isOn()):
 
 	while myCamera0.isOn() and myCamera2.isOn() and myCamera1.isOff():
 
-		got_frame0, frame0 = myCamera0.getFrame()
-		image0 = cv2.resize(frame0,None,fx=0.25, fy=0.25, interpolation = cv2.INTER_LINEAR)
-		t0 = cv2.cvtColor(image0, cv2.COLOR_RGB2GRAY)
+		got_frame0, frame0 = myCamera0.getAndWriteFrame()
+		got_frame2, frame2 = myCamera2.getAndWriteFrame()
 		
-		got_frame2, frame2 = myCamera2.getFrame()
-		image2 = cv2.resize(frame2,None,fx=0.25, fy=0.25, interpolation = cv2.INTER_LINEAR)
-		t2 = cv2.cvtColor(image2, cv2.COLOR_RGB2GRAY)
-		
-		# t0 = cv2.cvtColor(frame0, cv2.COLOR_RGB2GRAY)
-		# t2 = cv2.cvtColor(frame2, cv2.COLOR_RGB2GRAY)
+		t0 = cv2.cvtColor(frame0, cv2.COLOR_RGB2GRAY)
+		t2 = cv2.cvtColor(frame2, cv2.COLOR_RGB2GRAY)
 		
 		f0 = t0.copy()
 		f2 = t2.copy()
@@ -219,43 +200,37 @@ while(myCamera0.isOn() or myCamera1.isOn() or myCamera2.isOn()):
 		estimated0 = [int (c) for c in kalman2d0.getEstimate()]
 		estimated2 = [int (a) for a in kalman2d2.getEstimate()]
 
-		drawCross(image0, estimated0, 255, 255, 255)
-		drawCross(image2, estimated2, 255, 255, 255)
+		drawCross(frame0, estimated0, 255, 255, 255)
+		drawCross(frame2, estimated2, 255, 255, 255)
 		
-		drawCross(image0, measured0, 0,   0,   255)
-		drawCross(image2, measured2, 0,   0,   255)
-		# drawCross(frame0, measured0, 0,   0,   255)
-		# drawCross(frame2, measured2, 0,   0,   255)
-		# drawCross(frame0, estimated0, 0,   0,   255)
-		# drawCross(frame2, estimated2, 0,   0,   255)
+		drawCross(frame0, measured0, 0,   0,   255)
+		drawCross(frame2, measured2, 0,   0,   255)
 
-		cv2.imshow( winName[0], image0 )
-		cv2.imshow( winName[2], image2 )
-		# cv2.imshow( winName[0], frame0 )
-		# cv2.imshow( winName[2], frame2 )
+		cv2.imshow( winName[0], frame0 )
+		cv2.imshow( winName[2], frame2 )
 
 		delta_x0 = prev_x0 - estimated0[0]
 		delta_x2 = prev_x2 - estimated2[0]
 
 		
-		if((delta_x2 > 0) and (estimated2[0] >= (image2.shape[1]*0.9))):
+		if((delta_x2 > 0) and (estimated2[0] >= triggerWidthRight)):
 			print "turn camera 2 off"
 			myCamera2.off()
 			cv2.destroyWindow("2")
-			prev_x0 = (image1.shape[1]/2)
+			prev_x0 = centerx
 		
-		if((delta_x0 < 0) and (estimated0[0] <= (image0.shape[1]*0.1))):
+		if((delta_x0 < 0) and (estimated0[0] <= triggerWidthLeft)):
 			print "turn camera 0 off"
 			myCamera0.off()
 			cv2.destroyWindow("0")
-			prev_x2 = (image2.shape[1]/2)
+			prev_x2 = centerx
 
 		
-		if(estimated0[0] > (image0.shape[1]/2) ):
+		if(estimated0[0] > centerx ):
 			myCamera2.off()
 			cv2.destroyWindow("2")
 		
-		if(estimated2[0] < (image2.shape[1]/2) ):
+		if(estimated2[0] < centerx ):
 			myCamera0.off()
 			cv2.destroyWindow("0")
 		
@@ -270,10 +245,8 @@ while(myCamera0.isOn() or myCamera1.isOn() or myCamera2.isOn()):
 	
 	while (myCamera0.isOn() and myCamera1.isOff() and myCamera2.isOff()):
 		
-		got_frame0, frame0 = myCamera0.getFrame()
-		image0 = cv2.resize(frame0,None,fx=0.25, fy=0.25, interpolation = cv2.INTER_LINEAR)
-		t0 = cv2.cvtColor(image0, cv2.COLOR_RGB2GRAY)
-		# t0 = cv2.cvtColor(frame0, cv2.COLOR_RGB2GRAY)
+		got_frame0, frame0 = myCamera0.getAndWriteFrame()
+		t0 = cv2.cvtColor(frame0, cv2.COLOR_RGB2GRAY)
 		f0 = t0.copy()
 		masked_img0, x0, y0 = ta.diffaccWeight(f0,t0, avg_daw0)
 		
@@ -290,29 +263,27 @@ while(myCamera0.isOn() or myCamera1.isOn() or myCamera2.isOn()):
 
 		estimated0 = [int (c) for c in kalman2d0.getEstimate()]
 
-		drawCross(image0, estimated0, 255, 255, 255)
-		drawCross(image0, measured0, 0,   0,   255)
-		cv2.imshow( winName[0], image0 )
-		# drawCross(frame0, estimated0, 255, 255, 255)
-		# drawCross(frame0, measured0, 0,   0,   255)
-		# cv2.imshow( winName[0], frame0 )
+		drawCross(frame0, estimated0, 255, 255, 255)
+		drawCross(frame0, measured0, 0,   0,   255)
+
+		cv2.imshow( winName[0], frame0 )
 		
 		delta_x0 = prev_x0 - estimated0[0]
 		
 		
 		if(prev_x0 > 0):
 			
-
-			if((delta_x0 > 0) and (prev_x0 >= (image0.shape[1]*0.9))):
+			
+			if((delta_x0 > 0) and (estimated0[0] >= triggerWidthRight)):
 				print "turn camera 1 on"
 				myCamera1.on()
-				prev_x1 = int(image1.shape[1]/2)
-
+				prev_x1 = centerx
 			
-			if((delta_x0 < 0) and (prev_x0 <= (image0.shape[1]*0.1))):
+			
+			if((delta_x0 < 0) and (estimated0[0] <= triggerWidthLeft)):
 				print "turn camera 2 on"
 				myCamera2.on()
-				prev_x2 = int(image2.shape[1]/2)
+				prev_x2 = centerx
 			
 
 		key = cv2.waitKey(1)
@@ -325,10 +296,8 @@ while(myCamera0.isOn() or myCamera1.isOn() or myCamera2.isOn()):
 	
 	while (myCamera1.isOn() and myCamera0.isOff() and myCamera2.isOff()):
 		
-		got_frame1, frame1 = myCamera1.getFrame()
-		image1 = cv2.resize(frame1,None,fx=0.25, fy=0.25, interpolation = cv2.INTER_LINEAR)
-		t1 = cv2.cvtColor(image1, cv2.COLOR_RGB2GRAY)
-		# t1 = cv2.cvtColor(frame1, cv2.COLOR_RGB2GRAY)
+		got_frame1, frame1 = myCamera1.getAndWriteFrame()
+		t1 = cv2.cvtColor(frame1, cv2.COLOR_RGB2GRAY)
 		f1 = t1.copy()
 		masked_img1, x1, y1 = ta.diffaccWeight(f1,t1, avg_daw1)
 
@@ -344,19 +313,15 @@ while(myCamera0.isOn() or myCamera1.isOn() or myCamera2.isOn()):
 
 		estimated1 = [int (c) for c in kalman2d1.getEstimate()]
 
-		drawCross(image1, estimated1, 255, 255, 255)
-		drawCross(image1, measured1, 0,   0,   255)
-		cv2.imshow( winName[1], image1 )
-		
-		# drawCross(frame1, estimated1, 255, 255, 255)
-		# drawCross(frame1, measured1, 0,   0,   255)
-		# cv2.imshow( winName[1], frame1 )
-		
+		drawCross(frame1, estimated1, 255, 255, 255)
+		drawCross(frame1, measured1, 0,   0,   255)
+
+		cv2.imshow( winName[1], frame1 )
 		delta_x1 = prev_x1 - estimated1[0]
 
 		if(prev_x1 > 0):
 			
-			if((delta_x1 < 0) and (prev_x1 <= (image1.shape[1]*0.1))):
+			if((delta_x1 < 0) and (estimated1[0] <= triggerWidthLeft)):
 				print "turn camera 0 on"
 				myCamera0.on()
 				
@@ -369,10 +334,8 @@ while(myCamera0.isOn() or myCamera1.isOn() or myCamera2.isOn()):
 	
 	
 	while (myCamera2.isOn() and myCamera0.isOff() and myCamera1.isOff()):
-		got_frame2, frame2 = myCamera2.getFrame()
-		image2 = cv2.resize(frame2,None,fx=0.25, fy=0.25, interpolation = cv2.INTER_LINEAR)
-		t2 = cv2.cvtColor(image2, cv2.COLOR_RGB2GRAY)
-		# t2 = cv2.cvtColor(frame2, cv2.COLOR_RGB2GRAY)
+		got_frame2, frame2 = myCamera2.getAndWriteFrame()
+		t2 = cv2.cvtColor(frame2, cv2.COLOR_RGB2GRAY)
 		f2 = t2.copy()
 		masked_img2, x2, y2 = ta.diffaccWeight(f2,t2, avg_daw2)
 
@@ -388,20 +351,17 @@ while(myCamera0.isOn() or myCamera1.isOn() or myCamera2.isOn()):
 
 		estimated2 = [int (c) for c in kalman2d2.getEstimate()]
 
-		drawCross(image2, estimated2, 255, 255, 255)
-		drawCross(image2, measured2, 0,   0,   255)
-		cv2.imshow( winName[2], image2 )
+		drawCross(frame2, estimated2, 255, 255, 255)
+		drawCross(frame2, measured2, 0,   0,   255)
 
-		# drawCross(frame2, estimated2, 255, 255, 255)
-		# drawCross(frame2, measured2, 0,   0,   255)
-		# cv2.imshow( winName[2], frame2 )
+		cv2.imshow( winName[2], frame2 )
 
 		delta_x2 = prev_x2 - estimated2[0]
 
 		
 		if(estimated2[0] > 0):
 			
-			if((delta_x2 > 0) and (prev_x2 >= (image2.shape[1]*0.9))):
+			if((delta_x2 > 0) and (estimated2[0] >= triggerWidthRight)):
 				print "turn camera 0 on"
 				myCamera0.on()
 		
@@ -413,4 +373,4 @@ while(myCamera0.isOn() or myCamera1.isOn() or myCamera2.isOn()):
 			break
 	
 
-print 'hello'
+print 'goodbye world :\'('

@@ -41,17 +41,21 @@ measured_points0 = []
 measured0 = (0,0)
 
 got_frame0, frame0 = myCamera0.getFrame()
-t0 = cv2.cvtColor(frame0, cv2.COLOR_RGB2GRAY)
+image = cv2.resize(frame0,None,fx=0.25, fy=0.25, interpolation = cv2.INTER_CUBIC)
+t0 = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
 avg_daw0 = np.float32(t0)
 
-prev_x0 = int(640/2)
-prev_y0= int(480/2)
-
+prev_x0 = image.shape[1]
+prev_y0= image.shape[0]
+image = None
 while myCamera0.isOn():
 	
 	got_frame0, frame0 = myCamera0.getFrame()
+	
 	if got_frame0:
-		t0 = cv2.cvtColor(frame0, cv2.COLOR_RGB2GRAY)
+		image = cv2.resize(frame0,None,fx=0.25, fy=0.25, interpolation = cv2.INTER_CUBIC)
+
+		t0 = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
 		f0 = t0.copy()
 		masked_img0, x0, y0 = ta.diffaccWeight(f0,t0, avg_daw0)
 		
@@ -68,10 +72,10 @@ while myCamera0.isOn():
 
 		estimated0 = [int (c) for c in kalman2d0.getEstimate()]
 
-		drawCross(frame0, estimated0, 255, 255, 255)
-		drawCross(frame0, measured0, 0,   0,   255)
+		drawCross(image, estimated0, 255, 255, 255)
+		drawCross(image, measured0, 0,   0,   255)
 
-		cv2.imshow( winName[0], masked_img0 )
+		cv2.imshow( winName[0], image )
 		
 		delta_x0 = prev_x0 - estimated0[0]
 		

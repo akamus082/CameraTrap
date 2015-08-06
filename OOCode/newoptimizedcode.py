@@ -63,6 +63,7 @@ myCamera2.off()
 triggerWidthRight = frame0.shape[1]*0.9
 triggerWidthLeft = frame0.shape[1]*0.1
 centerx = int(frame0.shape[1]/2)
+<<<<<<< HEAD
 centery = int(frame0.shape[0]/2)
 prev_x0 = centerx
 prev_x1 = centerx
@@ -70,12 +71,25 @@ prev_x2 = centerx
 prev_y0 = centery
 prev_y1 = centery
 prev_y2 = centery
+=======
+
+prev_x0 = centerx
+prev_x1 = centerx
+prev_x2 = centerx
+prev_y0= int(480/2)
+prev_y1= int(480/2)
+prev_y2= int(480/2)
+>>>>>>> 200723833ddb53414b7c64ca3637b65b376d9dbf
 
 
 myCamera0.on()
 
 while(myCamera0.isOn() or myCamera1.isOn() or myCamera2.isOn()):
+<<<<<<< HEAD
 	'''
+=======
+	
+>>>>>>> 200723833ddb53414b7c64ca3637b65b376d9dbf
 	while myCamera0.isOn() and myCamera1.isOn() and myCamera2.isOff():
 		
 		got_frame0, frame0 = myCamera0.getAndWriteFrame()
@@ -241,7 +255,11 @@ while(myCamera0.isOn() or myCamera1.isOn() or myCamera2.isOn()):
 			myCamera0.off()
 			myCamera2.off()
 			break
+<<<<<<< HEAD
 	'''
+=======
+	
+>>>>>>> 200723833ddb53414b7c64ca3637b65b376d9dbf
 	
 	while (myCamera0.isOn() and myCamera1.isOff() and myCamera2.isOff()):
 		
@@ -270,6 +288,7 @@ while(myCamera0.isOn() or myCamera1.isOn() or myCamera2.isOn()):
 		
 		delta_x0 = prev_x0 - estimated0[0]
 		
+<<<<<<< HEAD
 		if((delta_x0 > 0) and (estimated0[0] >= triggerWidthRight)):
 			print "turn camera 1 on"
 			myCamera1.on()
@@ -282,6 +301,24 @@ while(myCamera0.isOn() or myCamera1.isOn() or myCamera2.isOn()):
 			myCamera0.off()
 			prev_x2 = centerx
 			
+=======
+		
+		if(prev_x0 > 0):
+			
+			
+			if((delta_x0 > 0) and (estimated0[0] >= triggerWidthRight)):
+				print "turn camera 1 on"
+				myCamera1.on()
+				prev_x1 = centerx
+			
+			
+			if((delta_x0 < 0) and (estimated0[0] <= triggerWidthLeft)):
+				print "turn camera 2 on"
+				myCamera2.on()
+				prev_x2 = centerx
+			
+
+>>>>>>> 200723833ddb53414b7c64ca3637b65b376d9dbf
 		key = cv2.waitKey(1)
 		if key == 27:
 			cv2.destroyWindow("0")
@@ -320,8 +357,11 @@ while(myCamera0.isOn() or myCamera1.isOn() or myCamera2.isOn()):
 			if((delta_x1 < 0) and (estimated1[0] <= triggerWidthLeft)):
 				print "turn camera 0 on"
 				myCamera0.on()
+<<<<<<< HEAD
 				prev_x0 = centerx
 				myCamera1.off()
+=======
+>>>>>>> 200723833ddb53414b7c64ca3637b65b376d9dbf
 				
 		key = cv2.waitKey(1)
 		if key == 27:
@@ -362,8 +402,11 @@ while(myCamera0.isOn() or myCamera1.isOn() or myCamera2.isOn()):
 			if((delta_x2 > 0) and (estimated2[0] >= triggerWidthRight)):
 				print "turn camera 0 on"
 				myCamera0.on()
+<<<<<<< HEAD
 				prev_x0 = centerx
 				myCamera2.off()
+=======
+>>>>>>> 200723833ddb53414b7c64ca3637b65b376d9dbf
 		
 
 		key = cv2.waitKey(1)

@@ -14,6 +14,7 @@ class Camera:
 		self.cap.set(3, 640)
 		self.cap.set(4, 480)
 
+
 	def on(self):
 		# turn the camera on
 		#self.inUse = True
@@ -36,6 +37,26 @@ class Camera:
 		# get the next video frame
 		self.got_frame, self.frame = self.cap.read()
 		return self.got_frame, self.frame
+
+	def getFrameLowRes(self):
+		# get the next video frame
+		self.got_frame, self.frame = self.cap.read()
+		lowres = cv2.resize(self.frame,None,fx=0.5, fy=0.5, interpolation = cv2.INTER_NEAREST)
+		return self.got_frame, lowres
+
+	# This function is still in production.
+	def getAndWriteFrame(self):
+		# get the next video frame
+		self.got_frame, self.frame = self.cap.read()
+		# filename = "pic_" + str(self.devNum)+ "_%04d" % self.filecount
+		# f = open(filename, 'w')
+		# f.write(self.frame.tostring())
+		# f.close()
+		# # Update the file count.
+		# self.filecount += 1
+		# # <<<< INCLUDE OPTION TO LOWER THE RES BEFORE RETURNING ?
+		lowres = cv2.resize(self.frame,None,fx=0.5, fy=0.5, interpolation = cv2.INTER_NEAREST)
+		return self.got_frame, lowres 
 	
 	def getName(self):
 		return str(self.filename)

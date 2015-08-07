@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import CameraTrapCV as CTCV
 ctcv = CTCV.CameraTrapCV()
-MIN_BLOB_SIZE = 50
+MIN_BLOB_SIZE = 30
 
 def diffaccWeight(f,t, avg):
 	x_pos = -1
@@ -29,7 +29,6 @@ def diffaccWeight(f,t, avg):
 
 		# Make sure it's big enough
 		if cv2.contourArea(contours[max_index]) >= MIN_BLOB_SIZE:
-			img_out = np.zeros(img_thresh.shape).astype(np.uint8)
 			cv2.drawContours(t, contours, max_index, (255, 255, 255), -1)
 			x_pos, y_pos = ctcv.getCentroid(contours[max_index])
 

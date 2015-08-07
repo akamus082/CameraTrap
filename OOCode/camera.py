@@ -11,8 +11,8 @@ class Camera:
 		#self.inUse = False
 		self.cap = cv2.VideoCapture(self.devNum)
 		self.cap.set(5, 30)
-		self.cap.set(3, 640)
-		self.cap.set(4, 480)
+		self.cap.set(3, 424)
+		self.cap.set(4, 240)
 
 
 	def on(self):
@@ -41,7 +41,7 @@ class Camera:
 	def getFrameLowRes(self):
 		# get the next video frame
 		self.got_frame, self.frame = self.cap.read()
-		lowres = cv2.resize(self.frame,None,fx=0.5, fy=0.5, interpolation = cv2.INTER_NEAREST)
+		lowres = cv2.resize(self.frame,None,fx=1, fy=1, interpolation = cv2.INTER_LINEAR)
 		return self.got_frame, lowres
 
 	# This function is still in production.
@@ -55,7 +55,7 @@ class Camera:
 		# # Update the file count.
 		# self.filecount += 1
 		# # <<<< INCLUDE OPTION TO LOWER THE RES BEFORE RETURNING ?
-		lowres = cv2.resize(self.frame,None,fx=0.5, fy=0.5, interpolation = cv2.INTER_NEAREST)
+		lowres = cv2.resize(self.frame,None,fx=1, fy=1, interpolation = cv2.INTER_LINEAR)
 		return self.got_frame, lowres 
 	
 	def getName(self):

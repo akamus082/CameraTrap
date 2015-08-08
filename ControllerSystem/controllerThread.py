@@ -10,6 +10,9 @@ import threading
 import Queue
 import writerThread
 import trackerThread
+import cv2
+from datetime import datetime
+import time
 
 # Callback function for changing camera state. Might take in arguments that
 # mean move main viewing window left or right of the current viewing window.
@@ -33,13 +36,27 @@ def main():
 	# Begin controlling frame distribution. (check parameters each time to see 
 	# if callback happened)
 
-t = threading.Thread(target=writerThread.testThread())
+	q = Queue.Queue()
 
-t.start()
+	t = threading.Thread(target=writerThread.write, args=(q,))
+	t.start()
 
+	print 'hi from main'
+	cap = cv2.VideoCapture(0)
+	cap.set(3,640)   #Match width
+	cap.set(4,480)   #Match height
 
-
-
+	starttime = time.time()
+	while (time.time() - starttime) < 5:
+		ret, frame = cap.read()
+		if ret:
+			timestamp = datetime.utcnow().strftime('%y%m%d%H%M%S%f')
+			devNum = 0  # this needs to be changed by the controller later.
+			tup = (frame, timestamp, devNum)
+			q.put(tup)
+	
+	#t.join()
 
 if __name__=='__main__':
 	print "starting program"
+	main()

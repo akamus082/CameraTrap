@@ -7,6 +7,7 @@
 #
 import cv2, sys
 import Queue
+import time
 
 running = True
 
@@ -18,24 +19,28 @@ def writeFrame(frameData):
 	timestampStr = str(frameData[1])
 	cameraNumberStr = str(frameData[2])
 	# Format the filename.
-	filename = 'view' + cameraNumberStr + '_' + timestampStr
+	filename = 'cam' + cameraNumberStr + '_' + timestampStr
 	# Create the new file and write the frame out as binary.
 	f = open(filename, 'w')
 	f.write(frame.tostring())
 	f.close
 
 # The main function to run when the thread is created.
-def main(frameQ):
+def write(frameQ):
 	print 'Initializing the writer thread.'
 
+	starttime = time.time()
 	# Continuously check the queue for a new frame tuple from the controller.
-	while running:
+	while (running) and (time.time() - starttime < 2):
 		# Pick up the next frame if the queue is not empty.
 		if not frameQ.empty():
 			# Write the next frame to file.
-			writeFrame(frameQ.get())
+			frame = frameQ.get()
+			writeFrame(frame)
+			starttime = time.time()
 
-	
+
+		
 
 
 

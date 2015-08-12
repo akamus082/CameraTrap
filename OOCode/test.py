@@ -32,8 +32,8 @@ measured_points0 = []
 measured0 = (0,0)
 
 got_frame0, frame0 = myCamera0.getFrame()
-#image = cv2.resize(frame0,None,fx=0.25, fy=0.25, interpolation = cv2.INTER_NEAREST)
-image = cv2.resize(frame0,None,fx=0.25, fy=0.25, interpolation = cv2.INTER_LINEAR)
+image = cv2.resize(frame0,None,fx=0.25, fy=0.25, interpolation = cv2.INTER_NEAREST)
+#image = cv2.resize(frame0,None,fx=0.25, fy=0.25, interpolation = cv2.INTER_LINEAR)
 #image = cv2.resize(frame0,None,fx=0.25, fy=0.25, interpolation = cv2.INTER_AREA)
 #image = cv2.resize(frame0,None,fx=0.25, fy=0.25, interpolation = cv2.INTER_CUBIC)
 #image = cv2.resize(frame0,None,fx=0.25, fy=0.25, interpolation = cv2.INTER_LANCZOS4)

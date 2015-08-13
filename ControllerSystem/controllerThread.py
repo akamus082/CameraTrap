@@ -14,6 +14,7 @@ import threading
 import Queue
 import writerThread
 import trackerThread
+import devmap
 import cv2
 from datetime import datetime
 import time
@@ -33,9 +34,13 @@ class Controller(object):
 		self.cap = cv2.VideoCapture(self.currentDev)
 		self.cap.set(3,800)
 		self.cap.set(4,600)
-		#self.cap.release()
-
-
+		
+		self.is360 = False  # I need to consider the case when this is true too it will be pretty different.
+		self.portList = ["1-1.1", "1-1.2", "1-1.3", "1-1.4"] # THIS SHOULD BE SLIGHTLY MORE AUTOMATED MAYBE???
+		# I will arbitrarily declare here that the port numbers count min to max and left to right.
+		self.currentPort = None  # takes care of edge case where no ports were selected.
+		if len(self.portList) > 0:
+			self.currentPort = self.portList[0]
 
 		print str(self.name) + ": initializing the controller"
 
@@ -56,6 +61,30 @@ class Controller(object):
 		self.cap.release()
 		self.cap.open(self.currentDev)
 		self.lock.release()
+
+	# callback function for the tracker to tell the view to move left
+	def moveLeft(self):
+		if self.is360 == False:
+
+
+	# callback function for the tracker to tell the view to move right
+	def moveRight(self):
+		return 0	
+
+
+	# Should return the devnum of the camera to the left.
+	def getCameraLeft(self):
+		if self.is360 == False:
+			currentIndex = self.portList.index(self.currentPort)
+			if currentIndex > 0:
+				nextPort = self.portList[currentIndex - 1]
+				return devmap.getdevnum(self.portList[nextPort])
+
+		
+
+
+	def getCameraRight(self):
+		return 0
 
 
 	def control(self):
@@ -92,7 +121,7 @@ class Controller(object):
 if __name__=='__main__':
 	controller = Controller()
 	controller.control() # The writer and tracker are created by the controller
-					 # so they will be started by it, not here.
+					 	 # so they will be started by it, not here.
 	
 
 ############################################################################

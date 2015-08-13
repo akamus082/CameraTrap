@@ -27,6 +27,18 @@ def getdevid(portid):
 				return "/dev/" + pathinfo[-1].rstrip()
 	return None
 
+# Same as getdevid, but it returns an int.
+def getdevnum(portid):
+	DIR = '/dev'
+	for device in os.listdir(DIR):		# Gets the /dev directory list.
+		if device.startswith("video"):  # Parses for video* (like grep).
+			pathinfo = getInfoAsList("/dev/" + str(device))
+			port = pathinfo[6]		# Item 6 identifies the usb port hierarchy.
+			if port == portid:
+				return int(pathinfo[-1].rstrip()[5:])
+	return None	
+
+
 
 # Takes in a video device path as a string (example: "/dev/video1").
 # Returns a string representing the usb port the device is attached to
@@ -34,6 +46,13 @@ def getdevid(portid):
 def getportid(devid):
 	if int(devid[-1]) in listDevNums(): 		# Confirm that devid exists.
 		return getInfoAsList(devid)[6]
+	else:
+		return None
+
+# This is the same as getportid(devid) except it takes in an integer.
+def getportid(devnum):
+	if devnum in listDevNums():
+		return getInfoAsList("/dev/video" + str(devnum))[6]
 	else:
 		return None
 
@@ -74,3 +93,4 @@ def listDevNums():
 			result += [int(device[5:])] # Add the int device number to the list.
 	return result
 
+print getdevnum("1-1.4")

@@ -1,7 +1,7 @@
 import threading
 from threading import Thread
 
-
+# simple example of how callbacks work
 
 class Manager(object):
     def __init__(self):

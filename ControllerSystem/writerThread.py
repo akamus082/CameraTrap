@@ -53,7 +53,7 @@ class Writer(Thread):
 				starttime = time.time()
 
 		print str(self.name) + ": goodbye"
-		
+
 
 
 

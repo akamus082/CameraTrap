@@ -94,3 +94,7 @@ def listDevNums():
 	return result
 
 print getdevnum("1-1.4")
+
+
+# Basic command that this file parses:
+# udevadm info /dev/video0

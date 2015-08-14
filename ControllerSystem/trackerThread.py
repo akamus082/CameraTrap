@@ -22,37 +22,44 @@ class Tracker(Thread):
 		self.lock = lock
 
 
-	def testRight(self, delay):
-		time.sleep(delay)
-		print str(self.name) + ': RIGHT'
-		self.parent.moveRight()
+	# def testRight(self, delay):
+	# 	time.sleep(delay)
+	# 	print str(self.name) + ': RIGHT'
+	# 	self.parent.moveRight()
 
 
-	def testLeft(self, delay):
-		time.sleep(delay)
-		print str(self.name) + ': LEFT'
-		self.parent.moveLeft()
+	# def testLeft(self, delay):
+	# 	time.sleep(delay)
+	# 	print str(self.name) + ': LEFT'
+	# 	self.parent.moveLeft()
 
 
 	def run(self):
 		print str(self.name) + ': Initializing the tracker thread.'
 
+
+		self.parent.moveRight()
+		self.parent.moveLeft()
+
+
+
+
 		# pretend to track.....
 		#while True:
 
 		# should I be using locks here???????????????????????????
-		t = 2
+		#t = 2
 
-		self.testLeft(t)
-		self.testRight(t)
-		self.testLeft(t)
-		self.testLeft(t)
-		self.testLeft(t)
-		self.testLeft(t)
-		self.testRight(t)
-		self.testRight(t)
-		self.testRight(t)
-		self.parent.finish()
+		# self.testLeft(t)
+		# self.testRight(t)
+		# self.testLeft(t)
+		# self.testLeft(t)
+		# self.testLeft(t)
+		# self.testLeft(t)
+		# self.testRight(t)
+		# self.testRight(t)
+		# self.testRight(t)
+		# self.parent.finish()
 
 		print str(self.name) + ": DONE"
 

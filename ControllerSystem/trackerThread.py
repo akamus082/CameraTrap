@@ -26,21 +26,34 @@ class Tracker(Thread):
 		print str(self.name) + ': Initializing the tracker thread.'
 
 		# pretend to track.....
-		while True:
+		#while True:
 
-			time.sleep(3)
-			print str(self.name) + ': ' + str(1)
+		# should I be using locks here???????????????????????????
 
-	 		self.lock.acquire()
-			self.parent.callback(1)
-			self.lock.release()
+		time.sleep(4)
+		print str(self.name) + ': moving right'
+		self.parent.moveRight()
 
-			time.sleep(3)
-			print str(self.name) + ': ' + str(0)
+		time.sleep(4)
+		print str(self.name) + ': moving right'
+		self.parent.moveRight()
 
-			self.lock.acquire()
-			self.parent.callback(0)
-			self.lock.release()
+		time.sleep(4)
+		print str(self.name) + ': moving right'
+		self.parent.moveRight()
+
+		time.sleep(4)
+		print str(self.name) + ': moving left'
+		self.parent.moveLeft()
+
+		time.sleep(4)
+		print str(self.name) + ': moving left'
+		self.parent.moveLeft()
+
+		time.sleep(4)
+		print str(self.name) + ': moving left'
+		self.parent.moveLeft()
+
 
 
 	# Pick up the avaliable frame from the controller. Consider sending the

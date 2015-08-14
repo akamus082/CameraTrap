@@ -29,18 +29,22 @@ class Controller(object):
 
 		self.lock = threading.RLock()
 
-		self.currentDev = 0
-
-		self.cap = cv2.VideoCapture(self.currentDev)
-		self.cap.set(3,800)
-		self.cap.set(4,600)
 		
 		self.is360 = False  # I need to consider the case when this is true too it will be pretty different.
 		self.portList = ["1-1.1", "1-1.2", "1-1.3", "1-1.4"] # THIS SHOULD BE SLIGHTLY MORE AUTOMATED MAYBE???
+		self.numCameras = len(self.portList)
 		# I will arbitrarily declare here that the port numbers count min to max and left to right.
+		
+		self.currentDev = 0 # for initialization.
 		self.currentPort = None  # takes care of edge case where no ports were selected.
 		if len(self.portList) > 0:
-			self.currentPort = self.portList[0]
+			self.currentPort = self.portList[3]
+			print "current port: " + str(self.currentPort)
+			self.currentDev = devmap.getdevnum(self.currentPort)
+
+		self.cap = cv2.VideoCapture(self.currentDev)
+		self.cap.set(3,640)
+		self.cap.set(4,480)
 
 		print str(self.name) + ": initializing the controller"
 
@@ -52,39 +56,59 @@ class Controller(object):
 	def createTracker(self):
 		print str(self.name) + ": creating the tracker"
 		tracker = trackerThread.Tracker(self.trackerQ, self.lock, parent=self)
+		print "Port List = " + str(self.portList)
 		return tracker
 
 
-	def callback(self, devnum):
-		self.currentDev = devnum
+	# def callback(self, devnum):
+	# 	self.currentDev = devnum
+	# 	self.lock.acquire()
+	# 	self.cap.release()
+	# 	self.cap.open(self.currentDev)
+	# 	self.lock.release()
+
+	# callback function for the tracker to tell the view to move left
+	def moveLeft(self):
+		self.currentDev = self.getCameraLeft()
 		self.lock.acquire()
 		self.cap.release()
 		self.cap.open(self.currentDev)
 		self.lock.release()
 
-	# callback function for the tracker to tell the view to move left
-	def moveLeft(self):
-		if self.is360 == False:
-
 
 	# callback function for the tracker to tell the view to move right
 	def moveRight(self):
-		return 0	
+		self.currentDev = self.getCameraRight()
+		self.lock.acquire()
+		self.cap.release()
+		self.cap.open(self.currentDev)
+		self.lock.release()	
 
 
 	# Should return the devnum of the camera to the left.
-	def getCameraLeft(self):
-		if self.is360 == False:
-			currentIndex = self.portList.index(self.currentPort)
-			if currentIndex > 0:
-				nextPort = self.portList[currentIndex - 1]
-				return devmap.getdevnum(self.portList[nextPort])
-
+	def getCameraRight(self):
+		nextPort = self.currentPort
+		currentIndex = self.portList.index(self.currentPort)
+		if currentIndex > 0:
+			nextPort = self.portList[currentIndex - 1]
+		elif self.is360 == True and currentIndex == 0:
+			nextPort = self.portList[-1]
+		print "nextport = " + str(nextPort)
+		self.currentPort = nextPort
+		return devmap.getdevnum(nextPort) 
 		
 
-
-	def getCameraRight(self):
-		return 0
+	def getCameraLeft(self):
+		nextPort = self.currentPort  # If this is the last camera in the array, it should just continue recording.
+		currentIndex = self.portList.index(self.currentPort)
+		print "currentIndex = " + str(currentIndex)
+		if currentIndex < self.numCameras - 1:
+			nextPort = self.portList[currentIndex + 1]
+		elif self.is360 == True and currentIndex == self.numCameras - 1:
+			nextPort = self.portList[0]
+		print "nextport = " + str(nextPort)
+		self.currentPort = nextPort
+		return devmap.getdevnum(nextPort)
 
 
 	def control(self):
@@ -109,7 +133,6 @@ class Controller(object):
 				devNum = self.currentDev  # this needs to be changed by the controller later.
 				
 				filename = 'cam' + str(devNum) + '_' + timestamp
-
 
 				tup = (frame, timestamp, devNum)
 				self.writerQ.put(tup)

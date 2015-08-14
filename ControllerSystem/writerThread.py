@@ -20,21 +20,34 @@ class Writer(Thread):
 		self.setName("writer") # Give the thread a human-readable name.
 		self.running = True
 		self.frameQ = queue
+		#self.videoSeqNums = [0, 0, 0] # edit by hand for number of cameras for now.
+		self.currentCamNum = 0
+		self.filecount = 0
+		self.seqNum = 0
+
 		
 
 	# Function for parsing the tuple and writing the frame to a file using a 
 	# naming scheme that indicates the camera number and the timestamp. 
 	def writeFrame(self, frameData):
+		newCamNum = frameData[2]
+		if self.currentCamNum != newCamNum:  # detect a camera change
+			self.seqNum += 1
+			self.filecount = 0
+			self.currentCamNum = newCamNum
 		# Parse the information from frameData.
 		frame = frameData[0]
 		timestampStr = str(frameData[1])
 		cameraNumberStr = str(frameData[2])
 		# Format the filename.
-		filename = 'cam' + cameraNumberStr + '_' + timestampStr
+		#filename = 'cam' + cameraNumberStr + '_' + timestampStr
+		filename = 'seq' + str(self.seqNum) + '_%07d' % self.filecount
 		# Create the new file and write the frame out as binary.
-		# f = open(filename, 'w')
-		# f.write(frame.tostring())
-		# f.close
+		f = open(filename, 'w')
+		f.write(frame.tostring())
+		f.close
+
+		self.filecount += 1
 
 	# The main function to run when the thread is created.
 	def run(self):

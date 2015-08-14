@@ -22,6 +22,18 @@ class Tracker(Thread):
 		self.lock = lock
 
 
+	def testRight(self, delay):
+		time.sleep(delay)
+		print str(self.name) + ': RIGHT'
+		self.parent.moveRight()
+
+
+	def testLeft(self, delay):
+		time.sleep(delay)
+		print str(self.name) + ': LEFT'
+		self.parent.moveLeft()
+
+
 	def run(self):
 		print str(self.name) + ': Initializing the tracker thread.'
 
@@ -29,31 +41,20 @@ class Tracker(Thread):
 		#while True:
 
 		# should I be using locks here???????????????????????????
+		t = 2
 
-		time.sleep(4)
-		print str(self.name) + ': moving right'
-		self.parent.moveRight()
+		self.testLeft(t)
+		self.testRight(t)
+		self.testLeft(t)
+		self.testLeft(t)
+		self.testLeft(t)
+		self.testLeft(t)
+		self.testRight(t)
+		self.testRight(t)
+		self.testRight(t)
+		self.parent.finish()
 
-		time.sleep(4)
-		print str(self.name) + ': moving right'
-		self.parent.moveRight()
-
-		time.sleep(4)
-		print str(self.name) + ': moving right'
-		self.parent.moveRight()
-
-		time.sleep(4)
-		print str(self.name) + ': moving left'
-		self.parent.moveLeft()
-
-		time.sleep(4)
-		print str(self.name) + ': moving left'
-		self.parent.moveLeft()
-
-		time.sleep(4)
-		print str(self.name) + ': moving left'
-		self.parent.moveLeft()
-
+		print str(self.name) + ": DONE"
 
 
 	# Pick up the avaliable frame from the controller. Consider sending the

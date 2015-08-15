@@ -1,7 +1,7 @@
 # TRACKER THREAD
 #
 # file: trackerThread.py
-# date: 7 AUG 2015
+# date: 14 AUG 2015
 # auth: Anne Christy
 # team: E4E, Camera Trap
 #
@@ -21,54 +21,29 @@ class Tracker(Thread):
 		self.frameQ = queue
 		self.lock = lock
 
-
-	# def testRight(self, delay):
-	# 	time.sleep(delay)
-	# 	print str(self.name) + ': RIGHT'
-	# 	self.parent.moveRight()
-
-
-	# def testLeft(self, delay):
-	# 	time.sleep(delay)
-	# 	print str(self.name) + ': LEFT'
-	# 	self.parent.moveLeft()
-
+	def getFrame():
+		self.lock.acquire()
+		frame = self.frameQ.get()
+		self.lock.release()
+		return frame
 
 	def run(self):
 		print str(self.name) + ': Initializing the tracker thread.'
 
+		# Function to switch cameras to the left: self.parent.moveLeft()
+		# Function to switch cameras to the right: self.parent.moveRight()
 
-		self.parent.moveRight()
-		self.parent.moveLeft()
+		# Write code here...
+		while True:
+			time.sleep(2)
+			self.parent.moveRight()
+			time.sleep(2)
+			self.parent.moveLeft()
+			
+
+		# pull the current frame from the queue with self.getFrame()
 
 
-
-
-		# pretend to track.....
-		#while True:
-
-		# should I be using locks here???????????????????????????
-		#t = 2
-
-		# self.testLeft(t)
-		# self.testRight(t)
-		# self.testLeft(t)
-		# self.testLeft(t)
-		# self.testLeft(t)
-		# self.testLeft(t)
-		# self.testRight(t)
-		# self.testRight(t)
-		# self.testRight(t)
-		# self.parent.finish()
+		self.parent.finish()  # Tell the Controller Thread that tracking is finished.
 
 		print str(self.name) + ": DONE"
-
-
-	# Pick up the avaliable frame from the controller. Consider sending the
-	# frames as a tuple (frame, camera number) so the tracker can be aware
-	# that its view has changed.
-
-	# Use the frame to run the tracking algorithm.
-
-	# If the algorithm says that the cameras should switch to the left or right,
-	# run the controller's callback function to change the camera state.

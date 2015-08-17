@@ -137,21 +137,22 @@ class Controller(object):
 				self.writerQ.put(tup)  # Send the frame to the writer.
 				self.threadLock.acquire()
 				self.trackerQ.queue.clear() # empty so tracker pulls newest frame.
+				#print "put frame in trackerQ"
 				self.trackerQ.put(frame) # Send the frame to the tracker.
 				self.threadLock.release()
-				cv2.imshow('frame', frame)
-		        if cv2.waitKey(1) & 0xFF == ord('q'):
-		        	break
+				# cv2.imshow('frame', frame)
+		  #       if cv2.waitKey(1) & 0xFF == ord('q'):
+		  #       	break
 		writer.join()
 		tracker.join()
 
 if __name__=='__main__':
-	orderedPorts = ["1-1.1", "1-1.2", "1-1.3", "1-1.4"]
+	orderedPorts = ["1-2.4", "1-2.2"]
 	# Cameras at the front of the list are on the "right" and cameras at the
 	# end of the list are on the "left."
 	firstCamera = 1  # Index in orderPorts list for which camera turns on first.
 
 	# Create and start the controller object.
-	controller = Controller(ports=orderedPorts, isCircle=True, firstCamera=1)
+	controller = Controller(ports=orderedPorts, isCircle=True, firstCamera=0)
 	controller.control()
 	

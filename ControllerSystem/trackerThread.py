@@ -20,12 +20,16 @@ class Tracker(Thread):
 		self.setName("tracker")
 		self.frameQ = queue
 		self.lock = lock
+		self.lastFrame = None
 
-	def getFrame():
-		self.lock.acquire()
-		frame = self.frameQ.get()
-		self.lock.release()
-		return frame
+	def getFrame(self):
+		#self.lock.acquire()
+		if not self.frameQ.empty():
+			frame = self.frameQ.get()
+			self.lastFrame = frame
+			return frame
+		#self.lock.release()
+		return self.lastFrame
 
 	def run(self):
 		print str(self.name) + ': Initializing the tracker thread.'
@@ -34,11 +38,44 @@ class Tracker(Thread):
 		# Function to switch cameras to the right: self.parent.moveRight()
 
 		# Write code here...
+		while self.frameQ.empty():
+			print "waiting on contoller for initial Q value."
+			time.sleep(0)
+
+		#firstFrame = self.getFrame()
+
 		while True:
-			time.sleep(2)
-			self.parent.moveRight()
-			time.sleep(2)
+			# time.sleep(2)
+			# self.parent.moveRight()
+			# time.sleep(2)
+			# self.parent.moveLeft()
+			print "size " + str(self.frameQ.qsize())
+
+			# frame = self.getFrame()
+
+
+			# cv2.imshow('frame', frame)
+			# if cv2.waitKey(1) & 0xFF == ord('q'):
+		 # 		break
+			
+
+			for x in range(100):
+				print x
+				frame = self.getFrame()
+
+				cv2.imshow('frame', frame)
+				if cv2.waitKey(1) & 0xFF == ord('q'):
+			 		break
+			
 			self.parent.moveLeft()
+
+			for x in range(100):
+				print x
+				frame = self.getFrame()
+
+				cv2.imshow('frame', frame)
+				if cv2.waitKey(1) & 0xFF == ord('q'):
+			 		break
 			
 
 		# pull the current frame from the queue with self.getFrame()

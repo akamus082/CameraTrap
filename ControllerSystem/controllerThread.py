@@ -95,6 +95,7 @@ class Controller(object):
 	def getCameraRight(self):
 		nextPort = self.currentPort
 		currentIndex = self.portList.index(self.currentPort)
+		print "currentIndex = " + str(currentIndex)
 		if currentIndex > 0:  # Check if the camera is on the far right.
 			nextPort = self.portList[currentIndex - 1]
 		elif self.is360 == True and currentIndex == 0:
@@ -129,16 +130,18 @@ class Controller(object):
  			self.lock.acquire()
 			ret, frame = self.cap.read()  # Read the frame from the camera.
 			self.lock.release()
+			resize_image = cv2.resize(frame,None,fx=0.5, fy=0.5, interpolation = cv2.INTER_NEAREST)
 			if ret:
 				timestamp = datetime.utcnow().strftime('%y%m%d%H%M%S%f')
 				devNum = self.currentDev
 				#filename = 'cam' + str(devNum) + '_' + timestamp
 				tup = (frame, timestamp, devNum, self.isRunning)
+				#tup2 = (resize_image, devNum)
 				self.writerQ.put(tup)  # Send the frame to the writer.
 				self.threadLock.acquire()
 				self.trackerQ.queue.clear() # empty so tracker pulls newest frame.
 				#print "put frame in trackerQ"
-				self.trackerQ.put(frame) # Send the frame to the tracker.
+				self.trackerQ.put(resize_image) # Send the frame to the tracker.
 				self.threadLock.release()
 				# cv2.imshow('frame', frame)
 		  #       if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -147,12 +150,12 @@ class Controller(object):
 		tracker.join()
 
 if __name__=='__main__':
-	orderedPorts = ["1-2.4", "1-2.2"]
+	orderedPorts = ["1-1.2", "3-1:1.0", "3-2:1.0"]
 	# Cameras at the front of the list are on the "right" and cameras at the
 	# end of the list are on the "left."
-	firstCamera = 1  # Index in orderPorts list for which camera turns on first.
+	firstCamera = 0  # Index in orderPorts list for which camera turns on first.
 
 	# Create and start the controller object.
-	controller = Controller(ports=orderedPorts, isCircle=True, firstCamera=0)
+	controller = Controller(ports=orderedPorts, isCircle=False, firstCamera=0)
 	controller.control()
 	

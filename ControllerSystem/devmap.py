@@ -95,6 +95,8 @@ def listDevNums():
 
 print getdevnum("1-1.4")
 
-
+print getportid(0)
+print getportid(1)
+print getportid(2)
 # Basic command that this file parses:
 # udevadm info /dev/video0

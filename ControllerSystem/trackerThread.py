@@ -78,8 +78,7 @@ class Tracker(Thread):
 		delta = 0
 		prev_estx = 0
 		prev_esty = 0
-		prev_x = 0
-		prev_y = 0
+
 		frames_processed = 0
 		outsideLoop = True
 		insideLoop = False
@@ -95,7 +94,7 @@ class Tracker(Thread):
 			t0 = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
 			avg_daw0 = np.float32(t0)
 			
-			while (frames_processed < 15):
+			while (frames_processed < 30):
 				if (not self.frameQ.empty()):
 					frame = self.getFrame()
 					track(frame, avg_daw0)
@@ -105,6 +104,10 @@ class Tracker(Thread):
 			insideLoop = True
 			triggerWidthRight = frame.shape[1]*0.9
 			triggerWidthLeft = frame.shape[1]*0.1
+			centerx = int(frame.shape[1]/2)
+			centery = int(frame.shape[0]/2)
+			prev_x = centerx
+			prev_y = centery
 		
 			while insideLoop:
 				#print "inside loop"
@@ -164,8 +167,8 @@ class Tracker(Thread):
 						delta = 0
 						prev_estx = 0
 						prev_esty = 0
-						prev_x = 0
-						prev_y = 0
+						prev_x = centerx
+						prev_y = centery
 						frames_processed = 0
 						insideLoop = False
 						#print "moving left"
@@ -182,8 +185,8 @@ class Tracker(Thread):
 						delta = 0
 						prev_estx = 0
 						prev_esty = 0
-						prev_x = 0
-						prev_y = 0
+						prev_x = centerx
+						prev_y = centery
 						frames_processed = 0
 						insideLoop = False
 						#print "moving right"

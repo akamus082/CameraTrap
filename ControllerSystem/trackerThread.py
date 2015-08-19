@@ -16,6 +16,27 @@ import numpy as np
 import trackingalgos as ta
 from kalman2d import Kalman2D
 
+global kalman2d0# = Kalman2D()
+global measured_points0# = []
+global measured0# = (0,0)
+global delta# = 0
+global prev_estx# = 0
+global prev_esty# = 0
+global frames_processed# = 0
+global insideLoop# = False
+global outsideLoop# = False
+# outsideLoop = True
+# insideLoop = False
+
+def resetValues():
+	kalman2d0 = Kalman2D()
+	measured_points0 = []
+	measured0 = (0,0)
+	delta = 0
+	prev_estx = 0
+	prev_esty = 0
+	frames_processed = 0
+	insideLoop = False
 
 def drawCross(img, center, r, g, b):
     '''
@@ -33,13 +54,11 @@ def drawCross(img, center, r, g, b):
     cv2.line(img, (ctrx - d, ctry - d), (ctrx + d, ctry + d), color, t, cv2.CV_AA)
     cv2.line(img, (ctrx + d, ctry - d), (ctrx - d, ctry + d), color, t, cv2.CV_AA)
 
-def track(frame, avg_daw0):
+def track(frame, avg_frame):
 	
-	#image = cv2.resize(frame,None,fx=1, fy=1, interpolation = cv2.INTER_NEAREST)
-
-	t0 = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
-	f0 = t0.copy()
-	img_threshold, x, y = ta.diffaccWeight(f0,t0, avg_daw0)
+	gray = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
+	gray_copy = gray.copy()
+	img_threshold, x, y = ta.diffaccWeight(gray_copy,gray, avg_frame)
 	return img_threshold, x, y
 
 class Tracker(Thread):
@@ -71,36 +90,28 @@ class Tracker(Thread):
 		#initialize parameters for the Kalman Filter
 		kalman2d0 = Kalman2D()
 		measured_points0 = []
-		#kalman_points = []
 		measured0 = (0,0)
-
-		#Initialize parameters
 		delta = 0
 		prev_estx = 0
 		prev_esty = 0
-
 		frames_processed = 0
 		outsideLoop = True
-		insideLoop = False
 
 		while outsideLoop:
-			#print "outsideLoop"
 			self.startTime = time.time()
 			while self.frameQ.empty():
-					#print "waiting on contoller for initial Q value."
-					time.sleep(0)
+				time.sleep(0)
 			
 			frame = self.getFrame()
-			t0 = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
-			avg_daw0 = np.float32(t0)
+			gray = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
+			avg_frame = np.float32(gray)
 			
-			while (frames_processed < 30):
+			while (frames_processed < 15):
 				if (not self.frameQ.empty()):
 					frame = self.getFrame()
-					track(frame, avg_daw0)
+					track(frame, avg_frame)
 					frames_processed+=1
 
-		#if (frames_processed == 15):
 			insideLoop = True
 			triggerWidthRight = frame.shape[1]*0.9
 			triggerWidthLeft = frame.shape[1]*0.1
@@ -110,15 +121,12 @@ class Tracker(Thread):
 			prev_y = centery
 		
 			while insideLoop:
-				#print "inside loop"
 				while self.frameQ.empty():
-					#print "waiting on contoller for initial Q value."
 					time.sleep(0)
 				
 				frame = self.getFrame()
 				if (frame != None):
-					track_img, x, y = track(frame, avg_daw0)
-
+					track_img, x, y = track(frame, avg_frame)
 
 					if(x == self.timerOldX and y == self.timerOldY):
 						#print "NOT different"
@@ -129,16 +137,11 @@ class Tracker(Thread):
 							break
 					else:
 						self.startTime = time.time()
-						#print " x and y different"
-						#print str(x) + " "+ str(y)
-						#print str(self.timerOldX) + " " + str(self.timerOldY) + "\n"
 
 					self.timerOldX = x
 					self.timerOldY = y
 						
-						
 					if((x != -1) | (y != -1)):
-						
 						prev_x = x
 						prev_y = y
 						measured0 = (x,y)
@@ -153,8 +156,6 @@ class Tracker(Thread):
 
 					delta = estimated0[0] - prev_estx
 
-					#print delta
-					
 					prev_estx = estimated0[0]
 					prev_esty = estimated0[1]
 
@@ -164,36 +165,18 @@ class Tracker(Thread):
 						self.lock.acquire()
 						self.frameQ.queue.clear()
 						self.lock.release()
-						delta = 0
-						prev_estx = 0
-						prev_esty = 0
+						resetValues()
 						prev_x = centerx
 						prev_y = centery
-						frames_processed = 0
-						insideLoop = False
-						#print "moving left"
-						kalman2d0 = Kalman2D()
-						measured_points0 = []
-						#kalman_points = []
-						measured0 = (0,0)
 						self.parent.moveLeft()
 
 					if((delta > 0) and (estimated0[0] > triggerWidthRight) and (prev_x > triggerWidthRight)):
 						self.lock.acquire()
 						self.frameQ.queue.clear()
 						self.lock.release()
-						delta = 0
-						prev_estx = 0
-						prev_esty = 0
+						resetValues()
 						prev_x = centerx
 						prev_y = centery
-						frames_processed = 0
-						insideLoop = False
-						#print "moving right"
-						kalman2d0 = Kalman2D()
-						measured_points0 = []
-						#kalman_points = []
-						measured0 = (0,0)
 						self.parent.moveRight()
 						
 					cv2.imshow("frame", frame)

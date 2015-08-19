@@ -22,14 +22,16 @@ from threading import Thread, current_thread
 
 
 class Controller(object):
-	def __init__(self, ports, isCircle, firstCamera):
-		self.name = "controller"
+	def __init__(self, ports, isCircle, firstCamera, delay):
+		#self.name = "controller"
 		# Boolean to clean up program at quit.
 		self.isRunning = True
 
 		# Make queues for communicating with other threads.
 		self.writerQ = Queue.Queue(maxsize=0)
 		self.trackerQ = Queue.Queue(maxsize=0)
+
+		self.trackerDelay = delay
 
 		# Create a lock for safely using the callback function.
 		self.lock = threading.RLock()
@@ -47,7 +49,7 @@ class Controller(object):
 		# Set the correct values for the currentPort.
 		if len(self.portList) > 0:
 			self.currentPort = self.portList[firstCamera]
-			print "current port: " + str(self.currentPort)
+			#print "current port: " + str(self.currentPort)
 			self.currentDev = devmap.getdevnum(self.currentPort)
 
 		# Create the VideoCapture object.
@@ -55,19 +57,19 @@ class Controller(object):
 		self.cap.set(3,640)
 		self.cap.set(4,480)
 
-		print str(self.name) + ": initializing the controller"
+		#print str(self.name) + ": initializing the controller"
 
 	# Returns a Writer Thread object.
 	def createWriter(self):
-		print str(self.name) + ": creating the writer"
+		#print str(self.name) + ": creating the writer"
 		writer = writerThread.Writer(self.writerQ, parent=self)
 		return writer
 
 	# Returns a Tracker Thread object that can run callbacks on the Controller.
 	def createTracker(self):
-		print str(self.name) + ": creating the tracker"
-		tracker = trackerThread.Tracker(self.trackerQ, self.threadLock, parent=self)
-		print "Port List = " + str(self.portList)
+		#print str(self.name) + ": creating the tracker"
+		tracker = trackerThread.Tracker(self.trackerQ, self.threadLock, self.trackerDelay, parent=self)
+		#print "Port List = " + str(self.portList)
 		return tracker
 
 	def finish(self):
@@ -75,32 +77,36 @@ class Controller(object):
 
 	# A callback function for the tracker to tell the view to move left.
 	def moveLeft(self):
-		self.currentDev = self.getCameraLeft()
-		self.lock.acquire()
-		self.cap.release()
-		self.cap.open(self.currentDev)
-		self.lock.release()
+		leftCam = self.getCameraLeft()
+		if not self.currentDev == leftCam:
+			self.currentDev = leftCam
+			self.lock.acquire()
+			self.cap.release()
+			self.cap.open(self.currentDev)
+			self.lock.release()
 
 
 	# A callback function for the tracker to tell the view to move right.
 	def moveRight(self):
-		self.currentDev = self.getCameraRight()
-		self.lock.acquire()
-		self.cap.release()
-		self.cap.open(self.currentDev)
-		self.lock.release()	
+		rightCam = self.getCameraRight()
+		if not self.currentDev == rightCam:
+			self.currentDev = rightCam
+			self.lock.acquire()
+			self.cap.release()
+			self.cap.open(self.currentDev)
+			self.lock.release()	
 
 
 	# Returns the device number of the camera left of the current camera.
 	def getCameraRight(self):
 		nextPort = self.currentPort
 		currentIndex = self.portList.index(self.currentPort)
-		print "currentIndex = " + str(currentIndex)
+		#print "currentIndex = " + str(currentIndex)
 		if currentIndex > 0:  # Check if the camera is on the far right.
 			nextPort = self.portList[currentIndex - 1]
 		elif self.is360 == True and currentIndex == 0:
 			nextPort = self.portList[-1]  # Wrap around.
-		print "nextport = " + str(nextPort)
+		#print "nextport = " + str(nextPort)
 		self.currentPort = nextPort
 		return devmap.getdevnum(nextPort) 
 		
@@ -108,12 +114,12 @@ class Controller(object):
 	def getCameraLeft(self):
 		nextPort = self.currentPort 
 		currentIndex = self.portList.index(self.currentPort)
-		print "currentIndex = " + str(currentIndex)
+		#print "currentIndex = " + str(currentIndex)
 		if currentIndex < self.numCameras - 1: # Check if camera is on end.
 			nextPort = self.portList[currentIndex + 1]
 		elif self.is360 == True and currentIndex == self.numCameras - 1:
 			nextPort = self.portList[0] # Wrap around.
-		print "nextport = " + str(nextPort)
+		#print "nextport = " + str(nextPort)
 		self.currentPort = nextPort
 		return devmap.getdevnum(nextPort)
 
@@ -150,12 +156,13 @@ class Controller(object):
 		tracker.join()
 
 if __name__=='__main__':
-	orderedPorts = ["1-1.2", "3-1:1.0", "3-2:1.0"]
+	#orderedPorts = ['1-1.3', '1-1.2', '1-1.1', '1-2.4', '1-2.3', '1-2.2', '1-2.1']
+	orderedPorts = ['1-2.1', '1-2.2', '1-2.3', '1-2.4', '1-1.1', '1-1.2', '1-1.3']
 	# Cameras at the front of the list are on the "right" and cameras at the
 	# end of the list are on the "left."
-	firstCamera = 0  # Index in orderPorts list for which camera turns on first.
+	firstCamera = 1  # Index in orderPorts list for which camera turns on first.
 
 	# Create and start the controller object.
-	controller = Controller(ports=orderedPorts, isCircle=False, firstCamera=0)
+	controller = Controller(ports=orderedPorts, isCircle=True, firstCamera=firstCamera, delay=10)
 	controller.control()
 	

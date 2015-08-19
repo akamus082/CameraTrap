@@ -93,10 +93,14 @@ def listDevNums():
 			result += [int(device[5:])] # Add the int device number to the list.
 	return result
 
-print getdevnum("1-1.4")
+
 
 print getportid(0)
 print getportid(1)
 print getportid(2)
+print getportid(3)
+print getportid(4)
+print getportid(5)
+print getportid(6)
 # Basic command that this file parses:
 # udevadm info /dev/video0

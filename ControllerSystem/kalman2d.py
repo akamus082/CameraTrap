@@ -25,7 +25,7 @@ class Kalman2D(object):
     A class for 2D Kalman filtering
     '''
 
-    def __init__(self, processNoiseCovariance=1e-3, measurementNoiseCovariance=1e-1, errorCovariancePost=0.1):
+    def __init__(self, processNoiseCovariance=1e-2, measurementNoiseCovariance=1e-1, errorCovariancePost=0.1):
         '''
         Constructs a new Kalman2D object.  
         For explanation of the error covariances see

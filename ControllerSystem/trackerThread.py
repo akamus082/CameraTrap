@@ -44,13 +44,17 @@ def track(frame, avg_daw0):
 
 class Tracker(Thread):
 
-	def __init__(self, queue, lock, parent=None):
+	def __init__(self, queue, lock, delay, parent=None):
 		threading.Thread.__init__(self)
 		self.parent = parent
 		self.setName("tracker")
 		self.frameQ = queue
 		self.lock = lock
 		self.lastFrame = None
+		self.startTime = 0
+		self.timerDelay = delay
+		self.timerOldX = None
+		self.timerOldY = None
 
 	def getFrame(self):
 		#self.lock.acquire()
@@ -59,7 +63,7 @@ class Tracker(Thread):
 			self.lastFrame = frame
 			return frame
 		#self.lock.release()
-		return None, None
+		return None
 
 	def run(self):
 		print str(self.name) + ': Initializing the tracker thread.'
@@ -81,8 +85,8 @@ class Tracker(Thread):
 		insideLoop = False
 
 		while outsideLoop:
-			print "outsideLoop"
-
+			#print "outsideLoop"
+			self.startTime = time.time()
 			while self.frameQ.empty():
 					#print "waiting on contoller for initial Q value."
 					time.sleep(0)
@@ -109,74 +113,93 @@ class Tracker(Thread):
 					time.sleep(0)
 				
 				frame = self.getFrame()
-				track_img, x, y = track(frame, avg_daw0)
+				if (frame != None):
+					track_img, x, y = track(frame, avg_daw0)
+
+
+					if(x == self.timerOldX and y == self.timerOldY):
+						#print "NOT different"
+						deltaTime = time.time() - self.startTime
+						if deltaTime > self.timerDelay:
+							outsideLoop = False
+							insideLoop = False
+							break
+					else:
+						self.startTime = time.time()
+						#print " x and y different"
+						#print str(x) + " "+ str(y)
+						#print str(self.timerOldX) + " " + str(self.timerOldY) + "\n"
+
+					self.timerOldX = x
+					self.timerOldY = y
+						
+						
+					if((x != -1) | (y != -1)):
+						
+						prev_x = x
+						prev_y = y
+						measured0 = (x,y)
+						drawCross(frame, (x, y), 0,   0,   255)
+					else:
+						measured0 = (prev_x, prev_y)
+
+					measured_points0.append(measured0)
+					kalman2d0.update(measured0[0], measured0[1])
+
+					estimated0 = [int (c) for c in kalman2d0.getEstimate()]
+
+					delta = estimated0[0] - prev_estx
+
+					#print delta
 					
-				if((x != -1) | (y != -1)):
-					
-					prev_x = x
-					prev_y = y
-					measured0 = (x,y)
-					drawCross(frame, (x, y), 0,   0,   255)
-				else:
-					measured0 = (prev_x, prev_y)
+					prev_estx = estimated0[0]
+					prev_esty = estimated0[1]
 
-				measured_points0.append(measured0)
-				kalman2d0.update(measured0[0], measured0[1])
+					drawCross(frame, estimated0, 255, 255, 255)
 
-				estimated0 = [int (c) for c in kalman2d0.getEstimate()]
+					if((delta < 0) and (estimated0[0] < triggerWidthLeft) and (prev_x < triggerWidthLeft)):
+						self.lock.acquire()
+						self.frameQ.queue.clear()
+						self.lock.release()
+						delta = 0
+						prev_estx = 0
+						prev_esty = 0
+						prev_x = 0
+						prev_y = 0
+						frames_processed = 0
+						insideLoop = False
+						#print "moving left"
+						kalman2d0 = Kalman2D()
+						measured_points0 = []
+						#kalman_points = []
+						measured0 = (0,0)
+						self.parent.moveLeft()
 
-				delta = estimated0[0] - prev_estx
-
-				#print delta
-				
-				prev_estx = estimated0[0]
-				prev_esty = estimated0[1]
-
-				drawCross(frame, estimated0, 255, 255, 255)
-
-				if((delta < 0) and (estimated0[0] < triggerWidthLeft) and (prev_x < triggerWidthLeft)):
-					self.lock.acquire()
-					self.frameQ.queue.clear()
-					self.lock.release()
-					delta = 0
-					prev_estx = 0
-					prev_esty = 0
-					prev_x = 0
-					prev_y = 0
-					frames_processed = 0
-					insideLoop = False
-					print "moving left"
-					kalman2d0 = Kalman2D()
-					measured_points0 = []
-					#kalman_points = []
-					measured0 = (0,0)
-					self.parent.moveLeft()
-
-				if((delta > 0) and (estimated0[0] > triggerWidthRight) and (prev_x > triggerWidthRight)):
-					self.lock.acquire()
-					self.frameQ.queue.clear()
-					self.lock.release()
-					delta = 0
-					prev_estx = 0
-					prev_esty = 0
-					prev_x = 0
-					prev_y = 0
-					frames_processed = 0
-					insideLoop = False
-					print "moving right"
-					kalman2d0 = Kalman2D()
-					measured_points0 = []
-					#kalman_points = []
-					measured0 = (0,0)
-					self.parent.moveRight()
-					
-				cv2.imshow("frame", frame)
-				key = cv2.waitKey(1)
-				if key == 27:
-					cv2.destroyWindow("0")
-					insideLoop = False
-					outsideLoop = False
-					break
+					if((delta > 0) and (estimated0[0] > triggerWidthRight) and (prev_x > triggerWidthRight)):
+						self.lock.acquire()
+						self.frameQ.queue.clear()
+						self.lock.release()
+						delta = 0
+						prev_estx = 0
+						prev_esty = 0
+						prev_x = 0
+						prev_y = 0
+						frames_processed = 0
+						insideLoop = False
+						#print "moving right"
+						kalman2d0 = Kalman2D()
+						measured_points0 = []
+						#kalman_points = []
+						measured0 = (0,0)
+						self.parent.moveRight()
+						
+					cv2.imshow("frame", frame)
+					key = cv2.waitKey(1)
+					if key == 27:
+						cv2.destroyWindow("0")
+						insideLoop = False
+						outsideLoop = False
+						break
 
 		self.parent.finish()  # Tell the Controller Thread that tracking is finished.
 

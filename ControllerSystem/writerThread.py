@@ -39,11 +39,12 @@ class Writer(Thread):
 		cameraNumberStr = str(frameData[2])
 		# Format the filename.
 		#filename = 'cam' + cameraNumberStr + '_' + timestampStr
-		filename = 'seq' + str(self.seqNum) + '_%07d' % self.filecount
+		filename = 'seq' + str(self.seqNum) + 'vid_%07d' % self.filecount
 		# Create the new file and write the frame out as binary.
-		# f = open(filename, 'w')
-		# f.write(frame.tostring())
-		# f.close
+		#print str(self.seqNum) + ":" + str(self.filecount)
+		f = open(filename, 'w')
+		f.write(frame.tostring())
+		f.close
 
 		self.filecount += 1
 

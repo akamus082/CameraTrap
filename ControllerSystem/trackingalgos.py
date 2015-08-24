@@ -1,65 +1,57 @@
+# TRACKING ALGORITHMS
+#
+# file: trackingalgos.py
+# date: 19 AUG 2015
+# auth: Jorge Pacheco
+# team: E4E, Camera Trap
+#
+# This file contains functional tracking algos that can be used
+# to run the CameraTrap system 
+
 import cv2
 import numpy as np
 import CameraTrapCV as CTCV
 ctcv = CTCV.CameraTrapCV()
+
+#minimum size of the 'white blob' to track
 MIN_BLOB_SIZE = 20
+#kernel image used to apply morphological changes
 kernel = np.ones((5,5),np.uint8)
 
-def getEstimate(x,y, f,t, avg):
-
-	f = cv2.GaussianBlur(f,(5,5),0)
-	cv2.accumulateWeighted(f,avg,0.4)
-	res = cv2.convertScaleAbs(avg)
-	
-	res2 = cv2.absdiff(t, res.copy())
-	ret,img_grey2 = cv2.threshold( res2, 7, 255, cv2.THRESH_BINARY )
-	img_grey2 = cv2.GaussianBlur(img_grey2,(5,5),0)
-	ret2,img_grey2 = cv2.threshold( img_grey2, 240, 255, cv2.THRESH_BINARY )
-
-	img_thresh = ctcv.bg_subtractor.apply(img_grey2, None, 0.05)
-	erosion = cv2.erode(img_thresh,kernel,iterations = 1)
-	img_thresh = cv2.dilate(erosion,kernel,iterations = 1)
-	img_thresh = cv2.morphologyEx(img_threshold, cv2.MORPH_OPEN, kernel)
-
-	if np.count_nonzero(img_thresh) > 1:
-		# Get the largest contour
-		contours, hierarchy = cv2.findContours(img_thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
-		# totally not from stack overflow
-		areas = [cv2.contourArea(c) for c in contours]
-		i_max  = np.argmax(areas)
-		max_index = ctcv.getLargestContourIndex(img_thresh)
-
-		# Make sure it's big enough
-		if cv2.contourArea(contours[max_index]) >= MIN_BLOB_SIZE:
-			img_out = np.zeros(img_thresh.shape).astype(np.uint8)
-			cv2.drawContours(t, contours, max_index, (255, 255, 255), -1)
-			x, y = ctcv.getCentroid(contours[max_index])
-
-	return x, y
-
-def diffaccWeight(f,t, avg):
+def diffaccWeight(gray_copy,gray, avg):
+	#define default values in case there is nothing to track
 	x = -1
 	y = -1
 
-	f = cv2.GaussianBlur(f,(5,5),0)
-	cv2.accumulateWeighted(f,avg,0.4)
+	#start by smoothing the image using gaussian blur
+	gray_copy = cv2.GaussianBlur(gray_copy,(5,5),0)
+	#compute the average weight of frames at rate 0.4
+	#this value can and should be changed depending on desired
+	#responsiveness of system
+	cv2.accumulateWeighted(gray_copy,avg,0.4)
+	
+	#make the accumulated weight redeable by scaling it down
 	res = cv2.convertScaleAbs(avg)
 	
-	res2 = cv2.absdiff(t, res.copy())
+	#take the difference of the average frame and the original gray frame
+	res2 = cv2.absdiff(gray, res.copy())
+
+	#threshold and smooth the image to reduce noises
 	ret,img_grey2 = cv2.threshold( res2, 7, 255, cv2.THRESH_BINARY )
 	img_grey2 = cv2.GaussianBlur(img_grey2,(5,5),0)
 	ret2,img_grey2 = cv2.threshold( img_grey2, 240, 255, cv2.THRESH_BINARY )
 
+	#apply background subtractor to get significan changes of frames
 	img_thresh = ctcv.bg_subtractor.apply(img_grey2, None, 0.05)
 	
+	#Erode and dilute the frame to further filter frame from noise 
 	img_thresh = cv2.morphologyEx(img_thresh, cv2.MORPH_OPEN, kernel)
 	
+	#only when image has a significant contour to track, compute its maximum area, 
+	#and draw that contour onto original gray image
 	if np.count_nonzero(img_thresh) > 5:
 		# Get the largest contour
 		contours, hierarchy = cv2.findContours(img_thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
-		# totally not from stack overflow
 		areas = [cv2.contourArea(c) for c in contours]
 		i_max  = np.argmax(areas)
 		max_index = ctcv.getLargestContourIndex(img_thresh)
@@ -67,10 +59,11 @@ def diffaccWeight(f,t, avg):
 		# Make sure it's big enough
 		if cv2.contourArea(contours[max_index]) >= MIN_BLOB_SIZE:
 			img_out = np.zeros(img_thresh.shape).astype(np.uint8)
-			cv2.drawContours(t, contours, max_index, (255, 255, 255), -1)
+			cv2.drawContours(gray, contours, max_index, (255, 255, 255), -1)
+			#the the x and y values of the object's centroid
 			x, y = ctcv.getCentroid(contours[max_index])
 
-	return t, x, y
+	return gray, x, y
 
 
 def runningAvg(frame, running_average_in_display, avg):
